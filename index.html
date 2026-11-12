@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ML lessons — interactive research explainers</title>
+<meta name="title-en" content="ML lessons — interactive research explainers">
+<meta name="title-hy" content="ML դասեր — հետազոտությունների ինտերակտիվ բացատրություններ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Armenian:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-dot"></span><span lang="en">ML lessons</span><span lang="hy">ML դասեր</span></a>
+  <div class="topbar-right">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button>
+      <button data-lang="hy" aria-pressed="false">ՀԱՅ</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="home-hero">
+    <span class="kicker"><span lang="en">Machine learning · student presentations</span><span lang="hy">Մեքենայական ուսուցում · ուսանողական ներկայացումներ</span></span>
+    <h1><span lang="en">Research papers, explained with pictures you can play with</span><span lang="hy">Գիտական հոդվածներ՝ բացատրված պատկերներով, որոնց հետ կարելի է խաղալ</span></h1>
+    <p class="lead" lang="en" style="font-size:20px">Each topic retells one recent AI research article in plain words, with interactive demos, charts and tables, in English and Armenian.</p>
+    <p class="lead" lang="hy" style="font-size:20px">Յուրաքանչյուր թեմա պարզ բառերով վերապատմում է արհեստական բանականության մեկ նոր հետազոտական հոդված՝ ինտերակտիվ ցուցադրություններով, գծապատկերներով և աղյուսակներով, անգլերենով և հայերենով։</p>
+    <div class="team">
+      <span class="chip"><span lang="en">Team: Gor · Friend 2 · Friend 3</span><span lang="hy">Թիմ՝ Գոռ · Ընկեր 2 · Ընկեր 3</span></span>
+    </div>
+  </section>
+
+  <section class="topics">
+    <a class="topic" href="global-workspace/index.html">
+      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(57,135,229,0.5)"/><stop offset="100%" stop-color="rgba(57,135,229,0)"/></radialGradient></defs>
+        <g stroke="rgba(140,140,150,0.18)">
+          <line x1="40" y1="30" x2="200" y2="85"/><line x1="70" y1="140" x2="200" y2="85"/><line x1="350" y1="40" x2="200" y2="85"/><line x1="330" y1="140" x2="200" y2="85"/>
+          <line x1="120" y1="20" x2="200" y2="85"/><line x1="280" y1="150" x2="200" y2="85"/><line x1="20" y1="90" x2="200" y2="85"/><line x1="380" y1="95" x2="200" y2="85"/>
+        </g>
+        <circle cx="200" cy="85" r="60" fill="url(#g1)"/>
+        <g fill="#5a5a66"><circle cx="40" cy="30" r="3"/><circle cx="70" cy="140" r="3"/><circle cx="350" cy="40" r="3"/><circle cx="330" cy="140" r="3"/><circle cx="120" cy="20" r="3"/><circle cx="280" cy="150" r="3"/><circle cx="20" cy="90" r="3"/><circle cx="380" cy="95" r="3"/></g>
+        <circle cx="200" cy="85" r="7" fill="#3987e5"/>
+        <text x="214" y="78" fill="#cfe2f9" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">J-space</text>
+      </svg>
+      <div class="body">
+        <span class="chip">Anthropic · 2026</span>
+        <h3><span lang="en">A global workspace in language models</span><span lang="hy">Գլոբալ աշխատանքային տարածք լեզվական մոդելներում</span></h3>
+        <p lang="en">Claude has a tiny “stage” of thoughts it can report, control and reason with. How it was found, and how it helps catch hidden intentions.</p>
+        <p lang="hy">Claude-ն ունի մտքերի փոքրիկ «բեմ», որը կարող է հաղորդել, կառավարել և օգտագործել դատողության համար։ Ինչպես այն գտան, և ինչպես է այն օգնում բացահայտել թաքնված մտադրությունները։</p>
+      </div>
+    </a>
+
+    <div class="topic soon">
+      <svg class="art" viewBox="0 0 400 170" aria-hidden="true"><text x="200" y="98" fill="#5a5a66" font-size="40" text-anchor="middle">?</text></svg>
+      <div class="body">
+        <span class="chip"><span lang="en">coming soon</span><span lang="hy">շուտով</span></span>
+        <h3><span lang="en">Topic 2</span><span lang="hy">Թեմա 2</span></h3>
+        <p lang="en">The second article will be added here.</p>
+        <p lang="hy">Երկրորդ հոդվածը կավելացվի այստեղ։</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p lang="en">Student project. Research belongs to its authors; we retell it in our own words.</p>
+    <p lang="hy">Ուսանողական նախագիծ։ Հետազոտությունները պատկանում են իրենց հեղինակներին, մենք դրանք վերապատմում ենք մեր բառերով։</p>
+  </div>
+</footer>
+</body>
+</html>
