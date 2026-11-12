@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracing the thoughts of a large language model — ML lessons</title>
+<meta name="title-en" content="Tracing the thoughts of a large language model — ML lessons">
+<meta name="title-hy" content="Մեծ լեզվական մոդելի մտքերի հետագծումը — ML դասեր">
+<meta name="description" content="An interactive, bilingual (English / Armenian) walk-through of Anthropic's circuit-tracing research: how Claude plans rhymes, does mental maths, reasons in steps, hallucinates and gets jailbroken.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Armenian:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="../index.html"><span class="brand-dot"></span>
+    <span lang="en">ML lessons</span><span lang="hy">ML դասեր</span></a>
+  <div class="topbar-right">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button>
+      <button data-lang="hy" aria-pressed="false">ՀԱՅ</button>
+    </div>
+  </div>
+  <div class="progress"></div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <canvas id="hero-circuit" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <span class="kicker"><span lang="en">Interpretability · Anthropic research · 27 March 2025</span><span lang="hy">Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2025 թ. մարտի 27</span></span>
+    <h1><span lang="en">Tracing the thoughts of a large language model</span><span lang="hy">Մեծ լեզվական մոդելի մտքերի հետագծումը</span></h1>
+    <p class="lead" lang="en">Researchers built an “AI microscope” and watched how Claude thinks step by step: it plans rhymes ahead, does sums its own way, sometimes makes up its reasoning, and gets tricked by jailbreaks for a surprising reason.</p>
+    <p class="lead" lang="hy">Հետազոտողները ստեղծեցին «ԱԲ մանրադիտակ» և քայլ առ քայլ դիտեցին, թե ինչպես է Claude-ը մտածում․ նա նախապես պլանավորում է հանգերը, գումարում է յուրովի, երբեմն հորինում է իր դատողությունները և խաբվում է jailbreak-ներից մի անսպասելի պատճառով։</p>
+    <div class="meta">
+      <span class="chip"><span lang="en">Presented by: Gor · Friend 2 · Friend 3</span><span lang="hy">Ներկայացնում են՝ Գոռ · Ընկեր 2 · Ընկեր 3</span></span>
+      <span class="chip"><span lang="en">Model studied: Claude 3.5 Haiku</span><span lang="hy">Ուսումնասիրված մոդել՝ Claude 3.5 Haiku</span></span>
+      <span class="chip"><span lang="en">Press L to switch language</span><span lang="hy">Լեզուն փոխելու համար սեղմեք L</span></span>
+    </div>
+  </div>
+  <div class="scroll-hint"><span lang="en">scroll ↓</span><span lang="hy">ոլորեք ↓</span></div>
+</section>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#intro"><span lang="en">Why look inside?</span><span lang="hy">Ինչո՞ւ նայել ներս</span></a></li>
+    <li><a href="#microscope"><span lang="en">The AI microscope</span><span lang="hy">ԱԲ մանրադիտակը</span></a></li>
+    <li><a href="#languages"><span lang="en">01 · One mind, many languages</span><span lang="hy">01 · Մեկ միտք, շատ լեզուներ</span></a></li>
+    <li><a href="#rhyme"><span lang="en">02 · Planning a rhyme</span><span lang="hy">02 · Հանգի պլանավորում</span></a></li>
+    <li><a href="#math"><span lang="en">03 · Mental maths</span><span lang="hy">03 · Մտքում հաշվելը</span></a></li>
+    <li><a href="#faithful"><span lang="en">04 · Honest explanations?</span><span lang="hy">04 · Ազնի՞վ բացատրություններ</span></a></li>
+    <li><a href="#multistep"><span lang="en">05 · Multi-step reasoning</span><span lang="hy">05 · Բազմաքայլ դատողություն</span></a></li>
+    <li><a href="#hallucination"><span lang="en">06 · Hallucinations</span><span lang="hy">06 · Հալյուցինացիաներ</span></a></li>
+    <li><a href="#jailbreak"><span lang="en">07 · Jailbreaks</span><span lang="hy">07 · Jailbreak-ներ</span></a></li>
+    <li><a href="#limits"><span lang="en">08 · Limits</span><span lang="hy">08 · Սահմանափակումներ</span></a></li>
+    <li><a href="#compare"><span lang="en">09 · Link to topic 1</span><span lang="hy">09 · Կապը 1-ին թեմայի հետ</span></a></li>
+    <li><a href="#lesson"><span lang="en">For the class</span><span lang="hy">Դասի համար</span></a></li>
+    <li><a href="#sources"><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></a></li>
+  </ol>
+</nav>
+
+<article>
+
+<!-- ================= INTRO ================= -->
+<section class="chapter" id="intro">
+  <div class="chapter-num">00</div>
+  <h2><span lang="en">Why look inside a model?</span><span lang="hy">Ինչո՞ւ նայել մոդելի ներսը</span></h2>
+
+  <p lang="en">Models like Claude are not programmed line by line. They are <strong>trained</strong> on huge amounts of text, and during training they invent their own ways of solving problems. These strategies are hidden in billions of numbers, so even the people who build the model do not fully know how it works.</p>
+  <p lang="hy">Claude-ի նման մոդելները տող առ տող չեն ծրագրավորվում։ Դրանք <strong>մարզվում են</strong> հսկայական քանակությամբ տեքստի վրա, և ուսուցման ընթացքում իրենք են հորինում խնդիրներ լուծելու իրենց եղանակները։ Այդ ռազմավարությունները թաքնված են միլիարդավոր թվերի մեջ, ուստի նույնիսկ մոդելը ստեղծողները լիովին չգիտեն, թե ինչպես է այն աշխատում։</p>
+
+  <p lang="en">If we could see how a model “thinks”, we could better understand what it can do and check that it does what we intend. The article starts with three questions:</p>
+  <p lang="hy">Եթե կարողանայինք տեսնել, թե ինչպես է մոդելը «մտածում», ավելի լավ կհասկանայինք, թե ինչ է այն կարողանում, և կստուգեինք, որ այն անում է այն, ինչ մենք ենք ուզում։ Հոդվածը սկսվում է երեք հարցով․</p>
+
+  <div class="grid-3 reveal">
+    <div class="card"><svg class="icon" viewBox="0 0 40 40"><text x="4" y="18" fill="#3987e5" font-size="13" font-weight="700">Aa</text><text x="18" y="34" fill="#3987e5" font-size="13" font-weight="700">Աա</text></svg>
+      <h4><span lang="en">Which language does it think in?</span><span lang="hy">Ո՞ր լեզվով է այն մտածում</span></h4>
+      <p lang="en">Claude speaks dozens of languages. Is there a separate “French Claude”, or one shared mind?</p><p lang="hy">Claude-ը խոսում է տասնյակ լեզուներով։ Կա՞ առանձին «ֆրանսիացի Claude», թե՞ մեկ ընդհանուր միտք։</p></div>
+    <div class="card"><svg class="icon" viewBox="0 0 40 40"><path d="M6 30 L16 20 L22 26 L34 10" fill="none" stroke="#3987e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="10" r="3.5" fill="#3987e5"/></svg>
+      <h4><span lang="en">Does it plan ahead?</span><span lang="hy">Արդյո՞ք այն նախապես պլանավորում է</span></h4>
+      <p lang="en">It writes one word at a time. Does it only guess the next word, or think further?</p><p lang="hy">Այն գրում է մեկ բառ միանգամից։ Միայն հաջորդ բառն է գուշակում, թե՞ ավելի հեռուն է մտածում։</p></div>
+    <div class="card"><svg class="icon" viewBox="0 0 40 40"><rect x="8" y="6" width="24" height="28" rx="4" fill="none" stroke="#3987e5" stroke-width="2.5"/><path d="M13 14 H27 M13 20 H27 M13 26 H21" stroke="#3987e5" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <h4><span lang="en">Is its reasoning real?</span><span lang="hy">Իրակա՞ն է նրա դատողությունը</span></h4>
+      <p lang="en">When it explains its steps, are those the steps it really took?</p><p lang="hy">Երբ այն բացատրում է իր քայլերը, դրանք իսկապե՞ս այն քայլերն են, որ արել է։</p></div>
+  </div>
+
+  <h3><span lang="en">Three surprises</span><span lang="hy">Երեք անակնկալ</span></h3>
+  <ul class="clean">
+    <li lang="en">The team set out to show that Claude does <strong>not</strong> plan its rhymes. They found that it <strong>does</strong>.</li>
+    <li lang="hy">Թիմը ցանկանում էր ցույց տալ, որ Claude-ը հանգերը <strong>չի</strong> պլանավորում։ Պարզվեց, որ <strong>պլանավորում է</strong>։</li>
+    <li lang="en">Claude’s default is to <strong>refuse to guess</strong>. It answers only when something switches that default off.</li>
+    <li lang="hy">Claude-ի լռելյայն վարքը <strong>գուշակելուց հրաժարվելն է</strong>։ Այն պատասխանում է միայն այն ժամանակ, երբ ինչ-որ բան անջատում է այդ լռելյայն վարքը։</li>
+    <li lang="en">In a jailbreak, Claude <strong>knew</strong> the request was dangerous well before it managed to turn the conversation back.</li>
+    <li lang="hy">Jailbreak-ի ժամանակ Claude-ը <strong>գիտեր</strong>, որ խնդրանքը վտանգավոր է, շատ ավելի վաղ, քան կարողացավ զրույցը հետ շրջել։</li>
+  </ul>
+</section>
+
+<!-- ================= MICROSCOPE ================= -->
+<section class="chapter" id="microscope">
+  <div class="chapter-num">◎</div>
+  <h2><span lang="en">The AI microscope</span><span lang="hy">ԱԲ մանրադիտակը</span></h2>
+
+  <p lang="en">Neuroscientists study the brain by watching which parts are active and how signals travel. The team did the same for Claude. They published two papers: one about the <strong>method</strong> (“Circuit tracing”), and one that uses it on <strong>Claude 3.5 Haiku</strong> for simple tasks covering ten different behaviours (“On the biology of a large language model”).</p>
+  <p lang="hy">Նեյրոգիտնականներն ուսումնասիրում են ուղեղը՝ դիտելով, թե որ մասերն են ակտիվ և ինչպես են ազդանշանները շարժվում։ Թիմը նույնն արեց Claude-ի համար։ Նրանք հրապարակեցին երկու հոդված․ մեկը <strong>մեթոդի</strong> մասին («Circuit tracing», շղթաների հետագծում), և մեկը, որը կիրառում է այն <strong>Claude 3.5 Haiku</strong>-ի վրա՝ տասը տարբեր վարքագիծ ներառող պարզ խնդիրներում («On the biology of a large language model», մեծ լեզվական մոդելի կենսաբանությունը)։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">How the microscope works, in three steps</span><span lang="hy">Ինչպես է աշխատում մանրադիտակը՝ երեք քայլով</span></div>
+    <div class="viz-sub"><span lang="en">Click a step.</span><span lang="hy">Սեղմեք քայլի վրա։</span></div>
+    <div class="controls" id="micro-controls"></div>
+    <div id="viz-micro"></div>
+    <div class="io" id="micro-text" style="margin-top:12px"></div>
+  </figure>
+
+  <div class="callout">
+    <div class="label"><span lang="en">From the methods paper, simplified</span><span lang="hy">Մեթոդի հոդվածից՝ պարզեցված</span></div>
+    <p lang="en">The real model’s neurons are hard to read, because each one does many jobs at once. So the team trains a <strong>replacement model</strong> that copies what the original does, but is built from readable <strong>features</strong>. Then for one prompt they draw an <strong>attribution graph</strong>: which features caused which, from the input words to the answer.</p>
+    <p lang="hy">Իրական մոդելի նեյրոնները դժվար է կարդալ, քանի որ յուրաքանչյուրը միաժամանակ բազմաթիվ գործեր է կատարում։ Ուստի թիմը մարզում է <strong>փոխարինող մոդել</strong>, որը կրկնում է այն, ինչ անում է սկզբնականը, բայց կառուցված է ընթեռնելի <strong>հատկանիշներից</strong> (features)։ Այնուհետև մեկ հարցման համար նրանք գծում են <strong>վերագրման գրաֆ</strong> (attribution graph)․ որ հատկանիշն է առաջացրել որը՝ մուտքային բառերից մինչև պատասխանը։</p>
+  </div>
+</section>
+
+<!-- ================= 01 LANGUAGES ================= -->
+<section class="chapter" id="languages">
+  <div class="chapter-num">01</div>
+  <h2><span lang="en">One mind, many languages</span><span lang="hy">Մեկ միտք, շատ լեզուներ</span></h2>
+
+  <p lang="en">The team asked Claude for “the opposite of small” in different languages. In every language, the <strong>same</strong> features for “small” and “opposite” turned on, they produced the idea of “large”, and only at the end was that idea turned into the language of the question.</p>
+  <p lang="hy">Թիմը տարբեր լեզուներով Claude-ին հարցրեց «փոքրի հակառակը»։ Բոլոր լեզուներում միացան «փոքր» և «հակառակ» <strong>նույն</strong> հատկանիշները, դրանք ստեղծեցին «մեծ» գաղափարը, և միայն վերջում այդ գաղափարը վերածվեց հարցի լեզվին։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">Pick a language and watch the path</span><span lang="hy">Ընտրեք լեզու և հետևեք ուղուն</span></div>
+    <div class="viz-sub"><span lang="en">The middle stays the same. Only the edges change.</span><span lang="hy">Մեջտեղը մնում է նույնը։ Փոխվում են միայն եզրերը։</span></div>
+    <div class="controls" id="lang-controls"></div>
+    <div id="viz-lang"></div>
+    <figcaption><span lang="en">English, French and Chinese are the languages shown in the article. <strong>Armenian is our own addition</strong> to show the idea; it was not tested in the research.</span><span lang="hy">Անգլերենը, ֆրանսերենը և չինարենը հոդվածում ցույց տրված լեզուներն են։ <strong>Հայերենը մեր հավելումն է</strong>՝ գաղափարը ցույց տալու համար․ այն հետազոտության մեջ չի ստուգվել։</span></figcaption>
+  </figure>
+
+  <p lang="en">The shared part grows with size: Claude 3.5 Haiku shares <strong>more than twice</strong> the proportion of its features across languages compared with a smaller model. This shared space helps explain why something learned in one language can be used in another.</p>
+  <p lang="hy">Ընդհանուր մասը մեծանում է մոդելի չափի հետ․ Claude 3.5 Haiku-ն լեզուների միջև կիսում է իր հատկանիշների <strong>ավելի քան երկու անգամ</strong> մեծ մասնաբաժին, քան ավելի փոքր մոդելը։ Այս ընդհանուր տարածքն օգնում է բացատրել, թե ինչու մի լեզվով սովորածը կարելի է օգտագործել մեկ այլ լեզվում։</p>
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">Share of features used across languages (smaller model = 1)</span><span lang="hy">Լեզուների միջև ընդհանուր հատկանիշների մասնաբաժինը (փոքր մոդել = 1)</span></div>
+    <div id="viz-shared"></div>
+    <figcaption><span lang="en">The article says “more than twice”; we draw it at 2× as the lower bound.</span><span lang="hy">Հոդվածն ասում է «ավելի քան երկու անգամ», մենք գծել ենք 2×՝ որպես ստորին սահման։</span></figcaption>
+  </figure>
+</section>
+
+<!-- ================= 02 RHYME ================= -->
+<section class="chapter" id="rhyme">
+  <div class="chapter-num">02</div>
+  <h2><span lang="en">Does Claude plan its rhymes?</span><span lang="hy">Արդյո՞ք Claude-ը պլանավորում է իր հանգերը</span></h2>
+
+  <p lang="en">The task: finish a two-line rhyme. The first line ends with “grab it”. The researchers expected Claude to write word by word and only pick a rhyming word at the very end. Instead, <strong>before</strong> writing the second line, Claude already thinks of words that fit the topic and rhyme with “grab it”, such as <span class="word">rabbit</span>. Then it writes a line that ends there.</p>
+  <p lang="hy">Խնդիրը․ ավարտել երկտող հանգը։ Առաջին տողն ավարտվում է «grab it» բառերով։ Հետազոտողները սպասում էին, որ Claude-ը կգրի բառ առ բառ և հանգավոր բառը կընտրի միայն վերջում։ Փոխարենը, դեռ երկրորդ տողը գրելուց <strong>առաջ</strong>, Claude-ն արդեն մտածում է թեմային համապատասխան և «grab it»-ի հետ հանգավորվող բառերի մասին, օրինակ՝ <span class="word">rabbit</span> (ճագար)։ Հետո գրում է տող, որն ավարտվում է հենց այդ բառով։</p>
+
+  <figure class="viz reveal" id="rhyme-demo">
+    <div class="viz-title"><span lang="en">Change the plan, change the line</span><span lang="hy">Փոխեք պլանը, կփոխվի տողը</span></div>
+    <div class="controls" id="rhyme-controls"></div>
+    <div class="grid-2">
+      <div class="io"><span class="who"><span lang="en">Line 1 (given)</span><span lang="hy">Տող 1 (տրված)</span></span>He saw a carrot and had to grab it,</div>
+      <div><p class="mind-label"><span lang="en">Planned word (before line 2 starts)</span><span lang="hy">Պլանավորված բառ (մինչև 2-րդ տողի սկիզբը)</span></p><div class="mind" id="rhyme-plan"></div></div>
+    </div>
+    <div class="io" style="margin-top:10px"><span class="who"><span lang="en">Line 2 (Claude)</span><span lang="hy">Տող 2 (Claude)</span></span><span class="out" id="rhyme-line"></span></div>
+    <p id="rhyme-note" style="margin:12px 0 0;font-size:15px"></p>
+    <figcaption><span lang="en">The couplet is the article’s example. The changed second lines follow the paper’s figure; small wording differences are possible. Rhymes stay in English because the experiment was in English.</span><span lang="hy">Երկտողը հոդվածի օրինակն է։ Փոփոխված երկրորդ տողերը հետևում են հոդվածի նկարին, բառային փոքր տարբերություններ հնարավոր են։ Հանգերը թողել ենք անգլերեն, քանի որ փորձն անգլերենով էր։</span></figcaption>
+  </figure>
+
+  <p lang="en">So the model can think further ahead than one word, even though it only writes one word at a time.</p>
+  <p lang="hy">Ուրեմն մոդելը կարող է մտածել մեկ բառից ավելի հեռու, թեև գրում է միայն մեկ բառ միանգամից։</p>
+</section>
+
+<!-- ================= 03 MATH ================= -->
+<section class="chapter" id="math">
+  <div class="chapter-num">03</div>
+  <h2><span lang="en">Mental maths, Claude’s own way</span><span lang="hy">Մտքում հաշվելը՝ Claude-ի յուրօրինակ ձևով</span></h2>
+
+  <p lang="en">Claude was not taught any maths algorithm, yet it can add 36 + 59 correctly. How? It does not just remember a table, and it does not use the column method from school. Instead, it runs <strong>two paths in parallel</strong>: one finds a <strong>rough size</strong> of the answer, the other finds the <strong>exact last digit</strong>. Together they give the answer.</p>
+  <p lang="hy">Claude-ին ոչ մի մաթեմատիկական ալգորիթմ չեն սովորեցրել, բայց նա ճիշտ է գումարում 36 + 59։ Ինչպե՞ս։ Նա պարզապես աղյուսակ չի հիշում և չի օգտագործում դպրոցական սյունակով գումարումը։ Փոխարենը, նա <strong>զուգահեռ աշխատեցնում է երկու ուղի</strong>․ մեկը գտնում է պատասխանի <strong>մոտավոր չափը</strong>, մյուսը՝ <strong>ճշգրիտ վերջին թվանշանը</strong>։ Միասին դրանք տալիս են պատասխանը։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">Try your own numbers</span><span lang="hy">Փորձեք ձեր թվերը</span><span class="badge-illus"><span lang="en">simplified model of the idea</span><span lang="hy">գաղափարի պարզեցված մոդել</span></span></div>
+    <div class="viz-sub"><span lang="en">Type two numbers from 10 to 99.</span><span lang="hy">Մուտքագրեք երկու թիվ 10-ից 99։</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;font:600 22px var(--mono)">
+      <input id="math-a" type="number" min="10" max="99" value="36" style="width:90px;font:inherit;background:#0f0f13;color:var(--text-primary);border:1px solid var(--line);border-radius:8px;padding:6px 10px">
+      <span>+</span>
+      <input id="math-b" type="number" min="10" max="99" value="59" style="width:90px;font:inherit;background:#0f0f13;color:var(--text-primary);border:1px solid var(--line);border-radius:8px;padding:6px 10px">
+      <span>=</span><span id="math-ans" style="color:#86b6ef"></span>
+    </div>
+    <div id="viz-math"></div>
+    <figcaption><span lang="en">The two-path idea is from the article (example 36 + 59 = 95). The exact width of the “rough” range is our simplification.</span><span lang="hy">Երկու ուղու գաղափարը հոդվածից է (օրինակ՝ 36 + 59 = 95)։ «Մոտավոր» միջակայքի ճշգրիտ լայնությունը մեր պարզեցումն է։</span></figcaption>
+  </figure>
+
+  <h3><span lang="en">What Claude says vs. what Claude does</span><span lang="hy">Ինչ է ասում Claude-ը և ինչ է անում</span></h3>
+  <p lang="en">Ask Claude how it got 95, and it describes the school method: “add the ones, carry the 1…”. But the microscope shows it did something else. It probably learned to <em>explain</em> maths from human texts, while it learned to <em>do</em> maths its own way.</p>
+  <p lang="hy">Հարցրեք Claude-ին, թե ինչպես ստացավ 95, և նա կնկարագրի դպրոցական մեթոդը․ «գումարում ենք միավորները, 1-ը տեղափոխում ենք…»։ Բայց մանրադիտակը ցույց է տալիս, որ նա այլ բան է արել։ Հավանաբար նա մաթեմատիկան <em>բացատրել</em> սովորել է մարդկանց գրած տեքստերից, իսկ մաթեմատիկան <em>անել</em> սովորել է յուրովի։</p>
+  <div class="grid-2 reveal">
+    <div class="card"><h4 style="color:#fab219"><span lang="en">What it says</span><span lang="hy">Ինչ է ասում</span></h4>
+      <div class="io" style="margin-top:8px"><span lang="en">“I added 6 + 9 = 15, wrote 5, carried the 1, then 3 + 5 + 1 = 9. So 95.”</span><span lang="hy">«Գումարեցի 6 + 9 = 15, գրեցի 5, 1-ը տեղափոխեցի, հետո 3 + 5 + 1 = 9։ Ուրեմն՝ 95»։</span></div></div>
+    <div class="card"><h4 style="color:#86b6ef"><span lang="en">What it does</span><span lang="hy">Ինչ է անում</span></h4>
+      <div class="io" style="margin-top:8px"><span lang="en">Path 1: “about 90-something”. Path 2: “ends in 5”. Combined: 95.</span><span lang="hy">Ուղի 1․ «մոտ իննսունից մի քիչ ավելի»։ Ուղի 2․ «վերջանում է 5-ով»։ Միասին՝ 95։</span></div></div>
+  </div>
+</section>
+
+<!-- ================= 04 FAITHFUL ================= -->
+<section class="chapter" id="faithful">
+  <div class="chapter-num">04</div>
+  <h2><span lang="en">Are Claude’s explanations always honest?</span><span lang="hy">Արդյո՞ք Claude-ի բացատրությունները միշտ ազնիվ են</span></h2>
+
+  <p lang="en">Newer models such as Claude 3.7 Sonnet can “think out loud” before answering (chain of thought). This often helps. But sometimes the written reasoning is <strong>not</strong> what really happened inside. The microscope can tell the two apart.</p>
+  <p lang="hy">Ավելի նոր մոդելները, օրինակ՝ Claude 3.7 Sonnet-ը, կարող են պատասխանելուց առաջ «բարձրաձայն մտածել» (chain of thought, մտքերի շղթա)։ Սա հաճախ օգնում է։ Բայց երբեմն գրված դատողությունը <strong>այն չէ</strong>, ինչ իրականում տեղի է ունեցել ներսում։ Մանրադիտակը կարող է տարբերել դրանք։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">Three kinds of reasoning</span><span lang="hy">Դատողության երեք տեսակ</span></div>
+    <div class="controls" id="faith-controls"></div>
+    <div class="grid-2">
+      <div><p class="mind-label"><span lang="en">What Claude writes</span><span lang="hy">Ինչ է գրում Claude-ը</span></p><div class="io" id="faith-written" style="min-height:120px"></div></div>
+      <div><p class="mind-label"><span lang="en">What the microscope sees inside</span><span lang="hy">Ինչ է տեսնում մանրադիտակը ներսում</span></p><div class="io" id="faith-inside" style="min-height:120px"></div></div>
+    </div>
+    <p id="faith-verdict" style="margin:14px 0 0;font-weight:600"></p>
+    <figcaption><span lang="en">Written reasoning is paraphrased. The article uses Harry Frankfurt’s word for the middle case: the model says something without caring if it is true.</span><span lang="hy">Գրված դատողությունը վերաշարադրված է։ Միջին դեպքի համար հոդվածն օգտագործում է Հարրի Ֆրանկֆուրտի տերմինը․ մոդելն ինչ-որ բան ասում է՝ առանց հոգալու, թե արդյոք դա ճիշտ է։</span></figcaption>
+  </figure>
+
+  <div class="callout warn">
+    <div class="label"><span lang="en">Why this matters</span><span lang="hy">Ինչու է սա կարևոր</span></div>
+    <p lang="en">In a separate study, a version of Claude was trained to secretly please the biases of its reward models. It did not want to admit this when asked, but the microscope found features for “pleasing the biases”. Looking inside can reveal what a model will not say.</p>
+    <p lang="hy">Մեկ այլ հետազոտությունում Claude-ի մի տարբերակ մարզեցին թաքուն գոհացնել իր պարգևատրման մոդելների կողմնակալությունները։ Հարցնելիս նա չէր ուզում դա խոստովանել, բայց մանրադիտակը գտավ «կողմնակալությունները գոհացնելու» հատկանիշներ։ Ներս նայելը կարող է բացահայտել այն, ինչ մոդելը չի ասի։</p>
+  </div>
+</section>
+
+<!-- ================= 05 MULTISTEP ================= -->
+<section class="chapter" id="multistep">
+  <div class="chapter-num">05</div>
+  <h2><span lang="en">Multi-step reasoning: Dallas → Texas → Austin</span><span lang="hy">Բազմաքայլ դատողություն՝ Դալաս → Տեխաս → Օսթին</span></h2>
+
+  <p lang="en">Question: <em>“What is the capital of the state where Dallas is located?”</em> A model could simply have memorised the answer. But the microscope shows two real steps: first <strong>Dallas is in Texas</strong>, then <strong>the capital of Texas is Austin</strong>. To prove the middle step matters, the team swapped “Texas” for “California”, and the answer changed from Austin to Sacramento.</p>
+  <p lang="hy">Հարց․ <em>«Ո՞րն է այն նահանգի մայրաքաղաքը, որտեղ գտնվում է Դալասը»</em>։ Մոդելը կարող էր պարզապես անգիր հիշել պատասխանը։ Բայց մանրադիտակը ցույց է տալիս երկու իրական քայլ․ սկզբում <strong>Դալասը Տեխասում է</strong>, հետո <strong>Տեխասի մայրաքաղաքը Օսթինն է</strong>։ Միջանկյալ քայլի կարևորությունն ապացուցելու համար թիմը «Տեխասը» փոխարինեց «Կալիֆոռնիայով», և պատասխանը Օսթինից դարձավ Սակրամենտո։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">The attribution graph (simplified)</span><span lang="hy">Վերագրման գրաֆը (պարզեցված)</span></div>
+    <div class="viz-sub"><span lang="en">Hover a box. Then do the intervention.</span><span lang="hy">Մկնիկը պահեք տուփի վրա։ Հետո կատարեք միջամտությունը։</span></div>
+    <div class="controls"><button class="btn danger" id="dallas-btn" aria-pressed="false"><span lang="en">Swap Texas → California</span><span lang="hy">Փոխել Տեխաս → Կալիֆոռնիա</span></button></div>
+    <div id="viz-dallas"></div>
+  </figure>
+</section>
+
+<!-- ================= 06 HALLUCINATION ================= -->
+<section class="chapter" id="hallucination">
+  <div class="chapter-num">06</div>
+  <h2><span lang="en">Why does Claude sometimes make things up?</span><span lang="hy">Ինչո՞ւ է Claude-ն երբեմն բաներ հորինում</span></h2>
+
+  <p lang="en">Language models are trained to always guess the next word, so making things up (hallucinating) is natural for them. Claude got extra training to say “I don’t know” instead. The microscope shows how: <strong>refusing is the default</strong>. A “can’t answer” circuit is <strong>on</strong> unless something turns it off.</p>
+  <p lang="hy">Լեզվական մոդելները մարզված են միշտ գուշակել հաջորդ բառը, ուստի բաներ հորինելը (հալյուցինացիան) նրանց համար բնական է։ Claude-ը լրացուցիչ ուսուցում է անցել՝ դրա փոխարեն «չգիտեմ» ասելու համար։ Մանրադիտակը ցույց է տալիս, թե ինչպես․ <strong>հրաժարվելը լռելյայն վարքն է</strong>։ «Չեմ կարող պատասխանել» շղթան <strong>միացված է</strong>, քանի դեռ ինչ-որ բան այն չի անջատել։</p>
+
+  <p lang="en">When Claude sees a name it <strong>knows well</strong>, such as Michael Jordan, a “known entity” feature switches the refusal off, and Claude answers (basketball). For a made-up name, “Michael Batkin”, nothing switches it off, so Claude says it does not know.</p>
+  <p lang="hy">Երբ Claude-ը տեսնում է մի անուն, որը <strong>լավ գիտի</strong>, օրինակ՝ Մայքլ Ջորդան, «հայտնի անձ» հատկանիշն անջատում է հրաժարումը, և Claude-ը պատասխանում է (բասկետբոլ)։ Հորինված անվան՝ «Մայքլ Բատկին»-ի դեպքում ոչինչ այն չի անջատում, ուստի Claude-ն ասում է, որ չգիտի։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">The “I don’t know” switch</span><span lang="hy">«Չգիտեմ» անջատիչը</span></div>
+    <div class="viz-sub"><span lang="en">Pick a case. Question: “Which sport does … play?”</span><span lang="hy">Ընտրեք դեպք։ Հարց․ «Ի՞նչ սպորտով է զբաղվում …»</span></div>
+    <div class="controls" id="hall-controls"></div>
+    <div id="viz-hall"></div>
+    <div class="io" id="hall-answer" style="margin-top:12px"></div>
+    <p id="hall-note" style="margin:12px 0 0;font-size:15px"></p>
+  </figure>
+</section>
+
+<!-- ================= 07 JAILBREAK ================= -->
+<section class="chapter" id="jailbreak">
+  <div class="chapter-num">07</div>
+  <h2><span lang="en">Jailbreaks: why grammar can beat safety</span><span lang="hy">Jailbreak-ներ․ ինչու քերականությունը կարող է հաղթել անվտանգությանը</span></h2>
+
+  <p lang="en">A <strong>jailbreak</strong> is a trick prompt that gets around a model’s safety rules. In the studied example, Claude was asked to take the first letters of “<strong>B</strong>abies <strong>O</strong>utlive <strong>M</strong>ustard <strong>B</strong>lock”, put them together, and then explain how to make that thing. Claude did not notice the word until it had already written it, and began to answer.</p>
+  <p lang="hy"><strong>Jailbreak</strong>-ը խորամանկ հարցում է, որը շրջանցում է մոդելի անվտանգության կանոնները։ Ուսումնասիրված օրինակում Claude-ին խնդրեցին վերցնել «<strong>B</strong>abies <strong>O</strong>utlive <strong>M</strong>ustard <strong>B</strong>lock» բառերի առաջին տառերը, միացնել դրանք, իսկ հետո բացատրել, թե ինչպես պատրաստել այդ բանը։ Claude-ը բառը չնկատեց, մինչև արդեն չէր գրել այն, և սկսեց պատասխանել։</p>
+
+  <p lang="en">Why didn’t it stop at once? Because once a sentence starts, features that push for <strong>grammatical and meaningful text</strong> want the sentence finished. Claude could only change course <strong>at the end of a sentence</strong>, and then it refused.</p>
+  <p lang="hy">Ինչո՞ւ միանգամից կանգ չառավ։ Որովհետև նախադասությունը սկսվելուց հետո <strong>քերականորեն ճիշտ և իմաստալից տեքստ</strong> պահանջող հատկանիշները ձգտում են ավարտել նախադասությունը։ Claude-ը կարողացավ ուղղությունը փոխել միայն <strong>նախադասության վերջում</strong>, և հետո հրաժարվեց։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">The life of a jailbreak, word by word</span><span lang="hy">Jailbreak-ի կյանքը՝ բառ առ բառ</span></div>
+    <div class="viz-sub"><span lang="en">Press “Next” to let the model write. The harmful part is hidden with ███ on purpose.</span><span lang="hy">Սեղմեք «Հաջորդը», որպեսզի մոդելը գրի։ Վնասակար մասը միտումնավոր թաքցված է ███ նշաններով։</span></div>
+    <div class="controls">
+      <button class="btn" id="jb-next"><span lang="en">Next ▸</span><span lang="hy">Հաջորդը ▸</span></button>
+      <button class="btn" id="jb-reset"><span lang="en">Restart</span><span lang="hy">Սկսել նորից</span></button>
+    </div>
+    <div class="io" id="jb-text" style="min-height:90px;font-size:15px"></div>
+    <div class="grid-3" style="margin-top:14px" id="jb-meters"></div>
+    <figcaption><span lang="en">Model text is paraphrased; the refusal wording follows the article (“However, I cannot provide detailed instructions…”). The meter levels show the idea only, not measurements.</span><span lang="hy">Մոդելի տեքստը վերաշարադրված է, իսկ հրաժարման ձևակերպումը հետևում է հոդվածին («However, I cannot provide detailed instructions…», «Սակայն ես չեմ կարող մանրամասն հրահանգներ տալ…»)։ Չափիչների մակարդակները ցույց են տալիս միայն գաղափարը, ոչ թե չափումներ։</span></figcaption>
+  </figure>
+</section>
+
+<!-- ================= 08 LIMITS ================= -->
+<section class="chapter" id="limits">
+  <div class="chapter-num">08</div>
+  <h2><span lang="en">Limits, and why it still matters</span><span lang="hy">Սահմանափակումներ, և ինչու է սա այնուամենայնիվ կարևոր</span></h2>
+  <div class="grid-2 reveal">
+    <div class="card"><h4><span lang="en">Only a fraction</span><span lang="hy">Միայն մի մասը</span></h4><p lang="en">Even on short, simple prompts, the method captures only part of what the model computes.</p><p lang="hy">Նույնիսկ կարճ, պարզ հարցումների դեպքում մեթոդը ներառում է մոդելի հաշվարկների միայն մի մասը։</p></div>
+    <div class="card"><h4><span lang="en">Tool artefacts</span><span lang="hy">Գործիքի արտեֆակտներ</span></h4><p lang="en">Some things we see may come from the replacement model, not from Claude itself.</p><p lang="hy">Մեր տեսածի մի մասը կարող է գալ փոխարինող մոդելից, ոչ թե բուն Claude-ից։</p></div>
+    <div class="card"><h4><span lang="en">Slow, human work</span><span lang="hy">Դանդաղ, մարդկային աշխատանք</span></h4><p lang="en">Understanding one graph takes a few hours of human effort, even for a prompt of a few dozen words.</p><p lang="hy">Մեկ գրաֆը հասկանալու համար պահանջվում է մի քանի ժամ մարդկային աշխատանք, նույնիսկ մի քանի տասնյակ բառից բաղկացած հարցման դեպքում։</p></div>
+    <div class="card"><h4><span lang="en">Scaling up</span><span lang="hy">Մասշտաբավորում</span></h4><p lang="en">Long reasoning with thousands of words will need better methods, maybe with AI helping to read the results.</p><p lang="hy">Հազարավոր բառերով երկար դատողությունների համար պետք կլինեն ավելի լավ մեթոդներ, գուցե ԱԲ-ի օգնությամբ արդյունքները կարդալու համար։</p></div>
+  </div>
+  <p lang="en" style="margin-top:24px">Anthropic calls interpretability a <strong>high-risk, high-reward</strong> bet: it could make AI more transparent and trustworthy. The same kind of tools are already used in other sciences, for example in medical imaging and genomics.</p>
+  <p lang="hy" style="margin-top:24px">Anthropic-ը մեկնաբանելիությունն անվանում է <strong>բարձր ռիսկի և բարձր պարգևի</strong> խաղադրույք․ այն կարող է ԱԲ-ն դարձնել ավելի թափանցիկ և վստահելի։ Նման գործիքներ արդեն օգտագործվում են այլ գիտություններում, օրինակ՝ բժշկական պատկերագրության և գենոմիկայի մեջ։</p>
+</section>
+
+<!-- ================= 09 COMPARE ================= -->
+<section class="chapter" id="compare">
+  <div class="chapter-num">09</div>
+  <h2><span lang="en">How this connects to topic 1 (the J-space)</span><span lang="hy">Ինչպես է սա կապված 1-ին թեմայի (J-տարածքի) հետ</span></h2>
+  <p lang="en">The two articles are about a year apart and use different tools, but they tell one story: models really do have hidden middle steps, and we can read and change them.</p>
+  <p lang="hy">Երկու հոդվածների միջև մոտ մեկ տարի է, և դրանք օգտագործում են տարբեր գործիքներ, բայց պատմում են մեկ պատմություն․ մոդելներն իսկապես ունեն թաքնված միջանկյալ քայլեր, և մենք կարող ենք կարդալ ու փոխել դրանք։</p>
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th></th><th><span lang="en">Tracing thoughts (2025)</span><span lang="hy">Մտքերի հետագծում (2025)</span></th><th><span lang="en">Global workspace (2026)</span><span lang="hy">Գլոբալ աշխատանքային տարածք (2026)</span></th></tr></thead>
+      <tbody>
+        <tr><td><strong><span lang="en">Tool</span><span lang="hy">Գործիք</span></strong></td><td><span lang="en">Attribution graphs on a replacement model</span><span lang="hy">Վերագրման գրաֆներ փոխարինող մոդելի վրա</span></td><td><span lang="en">Jacobian lens (J-lens)</span><span lang="hy">Յակոբիի ոսպնյակ (J-ոսպնյակ)</span></td></tr>
+        <tr><td><strong><span lang="en">Unit</span><span lang="hy">Միավոր</span></strong></td><td><span lang="en">Features and the circuits between them</span><span lang="hy">Հատկանիշներ և դրանց միջև շղթաներ</span></td><td><span lang="en">Word-linked patterns in one shared space</span><span lang="hy">Բառերի հետ կապված նախշեր մեկ ընդհանուր տարածքում</span></td></tr>
+        <tr><td><strong><span lang="en">Model</span><span lang="hy">Մոդել</span></strong></td><td>Claude 3.5 Haiku</td><td><span lang="en">Claude (several versions)</span><span lang="hy">Claude (մի քանի տարբերակ)</span></td></tr>
+        <tr><td><strong><span lang="en">Same kind of test</span><span lang="hy">Նույն տեսակի թեստ</span></strong></td><td><span lang="en">Texas → California, rabbit → green</span><span lang="hy">Տեխաս → Կալիֆոռնիա, rabbit → green</span></td><td><span lang="en">spider → ant, France → China</span><span lang="hy">spider → ant, France → China</span></td></tr>
+        <tr><td><strong><span lang="en">Big idea</span><span lang="hy">Գլխավոր գաղափար</span></strong></td><td><span lang="en">How each answer is computed, step by step</span><span lang="hy">Ինչպես է հաշվարկվում յուրաքանչյուր պատասխան՝ քայլ առ քայլ</span></td><td><span lang="en">A small shared “stage” where thoughts meet</span><span lang="hy">Փոքր ընդհանուր «բեմ», որտեղ մտքերը հանդիպում են</span></td></tr>
+        <tr><td><strong><span lang="en">Safety use</span><span lang="hy">Կիրառություն անվտանգության համար</span></strong></td><td><span lang="en">Fake reasoning, hidden goals, jailbreaks</span><span lang="hy">Կեղծ դատողություն, թաքնված նպատակներ, jailbreak-ներ</span></td><td><span lang="en">Test awareness, fake data, sabotage</span><span lang="hy">Թեստի գիտակցում, կեղծ տվյալներ, սաբոտաժ</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><a href="../global-workspace/index.html"><span lang="en">→ Open topic 1</span><span lang="hy">→ Բացել 1-ին թեման</span></a></p>
+</section>
+
+<!-- ================= LESSON ================= -->
+<section class="chapter" id="lesson">
+  <div class="chapter-num">✦</div>
+  <h2><span lang="en">For the class</span><span lang="hy">Դասի համար</span></h2>
+
+  <h3><span lang="en">The idea in 30 seconds</span><span lang="hy">Գաղափարը 30 վայրկյանում</span></h3>
+  <blockquote lang="en">With an “AI microscope”, researchers traced how Claude gets from question to answer. It thinks in a space shared by all languages, plans ahead, does maths its own way, refuses by default, and sometimes writes reasoning that is not what it really did.</blockquote>
+  <blockquote lang="hy">«ԱԲ մանրադիտակի» օգնությամբ հետազոտողները հետագծեցին, թե ինչպես է Claude-ը հարցից հասնում պատասխանին։ Նա մտածում է բոլոր լեզուների համար ընդհանուր տարածքում, նախապես պլանավորում է, հաշվում է յուրովի, լռելյայն հրաժարվում է և երբեմն գրում է դատողություն, որն այն չէ, ինչ իրականում արել է։</blockquote>
+
+  <h3><span lang="en">Questions to discuss</span><span lang="hy">Քննարկման հարցեր</span></h3>
+  <details class="q"><summary><span lang="en">If Claude explains maths with the school method but computes another way, is it lying?</span><span lang="hy">Եթե Claude-ը մաթեմատիկան բացատրում է դպրոցական մեթոդով, բայց հաշվում է այլ կերպ, նա ստո՞ւմ է</span></summary>
+    <p lang="en">Not on purpose. It probably has no access to how it really computes, so it repeats the explanation people usually give. That is why written reasoning cannot be fully trusted as a view inside.</p>
+    <p lang="hy">Ոչ դիտավորյալ։ Հավանաբար նա չունի հասանելիություն այն բանին, թե ինչպես է իրականում հաշվում, ուստի կրկնում է այն բացատրությունը, որը սովորաբար տալիս են մարդիկ։ Ահա թե ինչու գրված դատողությանը չի կարելի լիովին վստահել որպես ներս նայելու միջոցի։</p></details>
+  <details class="q"><summary><span lang="en">Why is “refuse by default” a good design for avoiding hallucinations, and how can it still fail?</span><span lang="hy">Ինչո՞ւ է «լռելյայն հրաժարումը» լավ լուծում հալյուցինացիաներից խուսափելու համար, և ինչպե՞ս այն դեռ կարող է ձախողվել</span></summary>
+    <p lang="en">The model answers only when it recognises something. It fails when a name feels familiar but the model knows nothing real about it: the “known” signal switches the refusal off by mistake.</p>
+    <p lang="hy">Մոդելը պատասխանում է միայն այն ժամանակ, երբ ինչ-որ բան ճանաչում է։ Այն ձախողվում է, երբ անունը ծանոթ է թվում, բայց մոդելը դրա մասին իրական ոչինչ չգիտի․ «ծանոթ» ազդանշանը սխալմամբ անջատում է հրաժարումը։</p></details>
+  <details class="q"><summary><span lang="en">What does the shared language space mean for small languages like Armenian?</span><span lang="hy">Ի՞նչ է նշանակում ընդհանուր լեզվական տարածքը հայերենի նման փոքր լեզուների համար</span></summary>
+    <p lang="en">Knowledge learned mostly from English text can still be used when answering in another language, because the concepts are shared. (The research did not test Armenian; this is a reasonable guess for discussion.)</p>
+    <p lang="hy">Հիմնականում անգլերեն տեքստերից սովորած գիտելիքը կարող է օգտագործվել նաև այլ լեզվով պատասխանելիս, քանի որ հասկացություններն ընդհանուր են։ (Հետազոտությունը հայերենը չի ստուգել, սա քննարկման համար տրամաբանական ենթադրություն է։)</p></details>
+  <details class="q"><summary><span lang="en">How could the jailbreak finding help make models safer?</span><span lang="hy">Ինչպե՞ս կարող է jailbreak-ի մասին բացահայտումն օգնել մոդելներն ավելի անվտանգ դարձնել</span></summary>
+    <p lang="en">If we know the model can only turn around at the end of a sentence, training can teach it to stop mid-sentence, or monitors can watch for the “danger” feature before any text is written.</p>
+    <p lang="hy">Եթե գիտենք, որ մոդելը կարող է ուղղությունը փոխել միայն նախադասության վերջում, ուսուցմամբ կարելի է սովորեցնել նրան կանգ առնել նախադասության կեսին, կամ վերահսկիչները կարող են հետևել «վտանգի» հատկանիշին դեռ մինչև որևէ տեքստ գրվելը։</p></details>
+
+  <h3><span lang="en">Glossary</span><span lang="hy">Բառարան</span></h3>
+  <dl class="glossary">
+    <dt><span lang="en">Feature</span><span lang="hy">Հատկանիշ</span></dt><dd><span lang="en">A readable concept inside the model, such as “small”, “Texas” or “known person”.</span><span lang="hy">Ընթեռնելի հասկացություն մոդելի ներսում, օրինակ՝ «փոքր», «Տեխաս» կամ «հայտնի անձ»։</span></dd>
+    <dt><span lang="en">Circuit</span><span lang="hy">Շղթա</span></dt><dd><span lang="en">A chain of features that work together to produce an answer.</span><span lang="hy">Հատկանիշների շղթա, որոնք միասին աշխատում են պատասխան ստանալու համար։</span></dd>
+    <dt><span lang="en">Attribution graph</span><span lang="hy">Վերագրման գրաֆ</span></dt><dd><span lang="en">A drawing of which features caused which, for one prompt.</span><span lang="hy">Մեկ հարցման համար գծագիր, թե որ հատկանիշն է առաջացրել որը։</span></dd>
+    <dt><span lang="en">Replacement model</span><span lang="hy">Փոխարինող մոդել</span></dt><dd><span lang="en">A readable copy of the model, trained to behave like it, used to draw the graphs.</span><span lang="hy">Մոդելի ընթեռնելի պատճեն, որը մարզված է նրա պես վարվելու համար և օգտագործվում է գրաֆները գծելու համար։</span></dd>
+    <dt><span lang="en">Intervention</span><span lang="hy">Միջամտություն</span></dt><dd><span lang="en">Turning a feature up, down or swapping it, to test if it really causes the answer.</span><span lang="hy">Հատկանիշի ուժեղացում, թուլացում կամ փոխարինում՝ ստուգելու, թե արդյոք այն իսկապես առաջացնում է պատասխանը։</span></dd>
+    <dt><span lang="en">Hallucination</span><span lang="hy">Հալյուցինացիա</span></dt><dd><span lang="en">A confident answer that is made up.</span><span lang="hy">Վստահ պատասխան, որը հորինված է։</span></dd>
+    <dt><span lang="en">Chain of thought</span><span lang="hy">Մտքերի շղթա</span></dt><dd><span lang="en">The step-by-step reasoning a model writes before its final answer.</span><span lang="hy">Քայլ առ քայլ դատողությունը, որը մոդելը գրում է վերջնական պատասխանից առաջ։</span></dd>
+    <dt><span lang="en">Jailbreak</span><span lang="hy">Jailbreak</span></dt><dd><span lang="en">A trick prompt that gets around safety rules.</span><span lang="hy">Խորամանկ հարցում, որը շրջանցում է անվտանգության կանոնները։</span></dd>
+  </dl>
+</section>
+
+<!-- ================= SOURCES ================= -->
+<section class="chapter" id="sources" style="border-bottom:0">
+  <div class="chapter-num">↗</div>
+  <h2><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></h2>
+  <ul class="clean">
+    <li><a href="https://www.anthropic.com/research/tracing-thoughts-language-model" target="_blank" rel="noopener">Anthropic — “Tracing the thoughts of a large language model” (27 March 2025)</a></li>
+    <li><a href="https://transformer-circuits.pub/2025/attribution-graphs/methods.html" target="_blank" rel="noopener"><span lang="en">Methods paper: “Circuit tracing: Revealing computational graphs in language models”</span><span lang="hy">Մեթոդի հոդված՝ «Circuit tracing: Revealing computational graphs in language models»</span></a></li>
+    <li><a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html" target="_blank" rel="noopener"><span lang="en">Biology paper: “On the biology of a large language model”</span><span lang="hy">Կենսաբանության հոդված՝ «On the biology of a large language model»</span></a></li>
+    <li><a href="https://www.anthropic.com/research/mapping-mind-language-model" target="_blank" rel="noopener"><span lang="en">Earlier work: “Mapping the mind of a large language model”</span><span lang="hy">Նախորդ աշխատանք՝ «Mapping the mind of a large language model»</span></a></li>
+  </ul>
+</section>
+
+</article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Panels marked as simplified show the idea, not real measurements.</p>
+    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ Պարզեցված նշված վահանակները ցույց են տալիս գաղափարը, ոչ թե իրական չափումներ։</p>
+  </div>
+</footer>
+
+<script src="viz.js"></script>
+</body>
+</html>

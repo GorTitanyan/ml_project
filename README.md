@@ -10,6 +10,7 @@ Open http://127.0.0.1:8765
 - `index.html` — home, list of topics
 - `assets/style.css`, `assets/app.js` — shared style, language switch, tooltips
 - `global-workspace/` — topic 1 (Anthropic, "A global workspace in language models")
+- `tracing-thoughts/` — topic 2 (Anthropic, "Tracing the thoughts of a large language model"), same structure
   - `index.html` — text; every paragraph exists twice: `lang="en"` and `lang="hy"`
   - `viz.js` — charts and demos (labels in `T({en, hy})`)
 
