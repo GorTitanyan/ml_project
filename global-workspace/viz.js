@@ -1,16 +1,23 @@
 // Visualisations for the global-workspace topic. Plain JS + SVG/canvas, no libraries.
 (function () {
   const C = {
-    blue: "#3987e5", orange: "#d95926", aqua: "#199e70", violet: "#9085e9",
-    text: "#f0efec", text2: "#c3c2b7", muted: "#8d8c85", line: "#2e2e38",
-    surface: "#15151a", surface2: "#1c1c23", surface3: "#25252e",
+    blue: "var(--series-1)", orange: "var(--series-2)", aqua: "var(--series-3)", violet: "var(--violet)", red: "var(--critical)",
+    text: "var(--text-primary)", text2: "var(--text-secondary)", muted: "var(--text-muted)", line: "var(--line)",
+    surface: "var(--surface-1)", surface2: "var(--surface-2)", surface3: "var(--surface-3)", off: "var(--off)",
+    blueText: "var(--blue-text)", altText: "var(--alt-text)", warnText: "var(--warn-text)", goodText: "var(--good-text)",
+    violetText: "var(--violet-text)", offText: "var(--off-text)", dim: "var(--dim)", cellOff: "var(--cell-off)", glass: "var(--glass)",
   };
+  // colours are CSS variables so they follow the theme; svg() puts fill/stroke into style, where var() works
+  const light = () => document.documentElement.dataset.theme === "light";
   const NS = "http://www.w3.org/2000/svg";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function svg(tag, attrs = {}, parent) {
     const el = document.createElementNS(NS, tag);
-    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    for (const k in attrs) {
+      if (k === "fill" || k === "stroke" || k === "stop-color") el.style.setProperty(k, attrs[k]);
+      else el.setAttribute(k, attrs[k]);
+    }
     if (parent) parent.appendChild(el);
     return el;
   }
@@ -75,7 +82,7 @@
         if (n.y < 0 || n.y > H) n.vy *= -1;
       });
       edges.forEach(([a, b, strong]) => {
-        ctx.strokeStyle = strong ? "rgba(57,135,229,0.16)" : "rgba(140,140,150,0.08)";
+        ctx.strokeStyle = strong ? "rgba(57,135,229,0.16)" : (light() ? "rgba(80,80,90,0.1)" : "rgba(140,140,150,0.08)");
         ctx.lineWidth = strong ? 1 : 0.8;
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       });
@@ -88,23 +95,24 @@
         pl.p += 0.02;
         const [a, b] = pl.e;
         const x = a.x + (b.x - a.x) * pl.p, y = a.y + (b.y - a.y) * pl.p;
-        ctx.fillStyle = "rgba(134,182,239,0.9)";
+        ctx.fillStyle = light() ? "rgba(47,120,214,0.75)" : "rgba(134,182,239,0.9)";
         ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 6.28); ctx.fill();
       });
-      nodes.forEach((n) => { ctx.fillStyle = "rgba(160,160,170,0.35)"; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, 6.28); ctx.fill(); });
+      nodes.forEach((n) => { ctx.fillStyle = (light() ? "rgba(90,90,100,0.35)" : "rgba(160,160,170,0.35)"); ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, 6.28); ctx.fill(); });
       hubs.forEach((h) => {
         const glow = 0.55 + 0.45 * Math.sin(t * 1.3 + h.phase);
         const g = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, 26);
         g.addColorStop(0, `rgba(57,135,229,${0.55 * glow})`); g.addColorStop(1, "rgba(57,135,229,0)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(h.x, h.y, 26, 0, 6.28); ctx.fill();
-        ctx.fillStyle = C.blue; ctx.beginPath(); ctx.arc(h.x, h.y, 4.5, 0, 6.28); ctx.fill();
+        ctx.fillStyle = "#3987e5"; ctx.beginPath(); ctx.arc(h.x, h.y, 4.5, 0, 6.28); ctx.fill();
         ctx.font = "600 13px 'JetBrains Mono', monospace";
-        ctx.fillStyle = `rgba(207,226,249,${0.45 + 0.5 * glow})`;
+        ctx.fillStyle = `rgba(${light() ? "28,90,168" : "207,226,249"},${0.45 + 0.5 * glow})`;
         ctx.fillText(h.w, h.x + 9, h.y - 8);
       });
       if (!reduced) requestAnimationFrame(frame);
     }
     build(); frame();
+    document.addEventListener("themechange", () => { if (reduced) frame(); });
     let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { build(); if (reduced) frame(); }, 150); });
   })();
 
@@ -145,11 +153,11 @@
 
     const sg = svg("g", { tabindex: 0 }, s);
     svg("ellipse", { cx: 470, cy: 160, rx: 130, ry: 120, fill: "url(#spot)" }, sg);
-    svg("rect", { x: 360, y: 95, width: 220, height: 140, rx: 16, fill: "rgba(21,21,26,0.6)", stroke: C.blue, "stroke-width": 2 }, sg);
-    const st = svg("text", { x: 470, y: 86, fill: "#9fc5f3", "font-size": 13, "font-weight": 700, "text-anchor": "middle" }, sg); st.textContent = L.stage;
+    svg("rect", { x: 360, y: 95, width: 220, height: 140, rx: 16, fill: C.glass, stroke: C.blue, "stroke-width": 2 }, sg);
+    const st = svg("text", { x: 470, y: 86, fill: C.blueText, "font-size": 13, "font-weight": 700, "text-anchor": "middle" }, sg); st.textContent = L.stage;
     [["spider", 400, 140], ["seven", 488, 130], ["rhyme", 430, 185], ["honest", 512, 200]].forEach(([w, x, y]) => {
       svg("rect", { x: x - 6, y: y - 17, width: w.length * 9 + 14, height: 24, rx: 6, fill: "rgba(57,135,229,0.18)", stroke: "rgba(57,135,229,0.55)" }, sg);
-      const tw = svg("text", { x: x + 1, y: y, fill: "#cfe2f9", "font-size": 14, "font-family": "JetBrains Mono, monospace", "font-weight": 600 }, sg); tw.textContent = w;
+      const tw = svg("text", { x: x + 1, y: y, fill: C.blueText, "font-size": 14, "font-family": "JetBrains Mono, monospace", "font-weight": 600 }, sg); tw.textContent = w;
     });
     Tip.bind(sg, () => `<strong>${esc(L.stage)}</strong><br>${esc(L.tipStage)}`);
 
@@ -198,14 +206,14 @@
     // lens
     svg("path", { d: "M439 70 L 470 30", stroke: C.blue, "stroke-width": 2 }, s);
     svg("ellipse", { cx: 490, cy: 26, rx: 26, ry: 16, fill: "rgba(57,135,229,0.15)", stroke: C.blue, "stroke-width": 2 }, s);
-    tx = svg("text", { x: 490, y: 31, fill: "#cfe2f9", "font-size": 12, "font-weight": 700, "text-anchor": "middle" }, s); tx.textContent = L.lens;
+    tx = svg("text", { x: 490, y: 31, fill: C.blueText, "font-size": 12, "font-weight": 700, "text-anchor": "middle" }, s); tx.textContent = L.lens;
     svg("path", { d: "M516 26 H600", stroke: C.blue, "stroke-width": 2, "marker-end": "" }, s);
     // readout
     tx = svg("text", { x: 610, y: 18, fill: C.muted, "font-size": 12 }, s); tx.textContent = L.readout;
     [["spider", 1], ["web", 0.6], ["legs", 0.45]].forEach(([w, a], i) => {
       const x = 610 + i * 92;
       svg("rect", { x, y: 26, width: 84, height: 26, rx: 6, fill: `rgba(57,135,229,${0.12 + 0.3 * a})`, stroke: `rgba(57,135,229,${0.3 + 0.5 * a})` }, s);
-      const t = svg("text", { x: x + 42, y: 44, fill: "#cfe2f9", "font-size": 13, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace", "font-weight": 600 }, s); t.textContent = w;
+      const t = svg("text", { x: x + 42, y: 44, fill: C.blueText, "font-size": 13, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace", "font-weight": 600 }, s); t.textContent = w;
     });
     // output
     svg("path", { d: `M${240 + N * 46 - 16} 130 H 700`, stroke: C.muted, "stroke-width": 1.5 }, s);
@@ -282,7 +290,7 @@
     }
     // sequential blue ramp: interpolate from near-surface to light blue
     const ramp = (v) => {
-      const a = [28, 42, 61], m = [37, 106, 191], b = [134, 182, 239];
+      const [a, m, b] = light() ? [[227, 236, 248], [93, 155, 227], [28, 90, 168]] : [[28, 42, 61], [37, 106, 191], [134, 182, 239]];
       const mix = (p, q, t) => p.map((x, i) => Math.round(x + (q[i] - x) * t));
       const c = v < 0.5 ? mix(a, m, v / 0.5) : mix(m, b, (v - 0.5) / 0.5);
       return `rgb(${c.join(",")})`;
@@ -291,8 +299,8 @@
       const rh = document.createElement("div"); rh.className = "rowhead mono"; rh.textContent = w; g.appendChild(rh);
       vals.forEach((v, i) => {
         const c = document.createElement("div"); c.className = "cell"; c.tabIndex = 0;
-        c.style.background = v < 0.04 ? "#17171c" : ramp(v);
-        c.style.color = v > 0.62 ? "#0d0d11" : "#e8eefc";
+        c.style.background = v < 0.04 ? C.cellOff : ramp(v);
+        c.style.color = light() ? (v > 0.5 ? "#ffffff" : "#18181d") : (v > 0.62 ? "#0d0d11" : "#e8eefc");
         c.textContent = v >= 0.5 ? w : "";
         Tip.bind(c, () => `<span class="mono">${esc(w)}</span> · ${esc(lname)} ${i + 1}<br>${esc(T({ en: "strength", hy: "ուժգնություն" }))}: ${Math.round(v * 100)}%`);
         g.appendChild(c);
@@ -369,7 +377,7 @@
     const host = document.getElementById("viz-connect");
     if (!host) return;
     hbar(host, [
-      { label: T({ en: "Ordinary pattern", hy: "Սովորական նախշ" }), v: 1, valueLabel: "1×", color: "#6b6b76" },
+      { label: T({ en: "Ordinary pattern", hy: "Սովորական նախշ" }), v: 1, valueLabel: "1×", color: C.offText },
       { label: T({ en: "J-space pattern", hy: "J-տարածքի նախշ" }), v: 100, valueLabel: T({ en: "≈100×", hy: "≈100×" }), tip: T({ en: "About 100 times more read/write connections in some parts of the network.", hy: "Ցանցի որոշ մասերում մոտ 100 անգամ ավելի շատ կարդալու/գրելու կապեր։" }) },
     ], { max: 100, ticks: [0, 25, 50, 75, 100], fmt: (v) => v + "×", aria: "connectivity" });
   }
@@ -387,7 +395,7 @@
     for (let i = 0; i < 100; i++) {
       const c = i % 20, r = (i / 20) | 0;
       const isJ = i < J;
-      const dot = svg("circle", { cx: 20 + c * 26, cy: 30 + r * 40, r: 9, fill: isJ ? C.blue : "#34343e", stroke: C.surface, "stroke-width": 2 }, s);
+      const dot = svg("circle", { cx: 20 + c * 26, cy: 30 + r * 40, r: 9, fill: isJ ? C.blue : C.dim, stroke: C.surface, "stroke-width": 2 }, s);
       if (isJ && !reduced) {
         const a = svg("animate", { attributeName: "r", values: "9;10.5;9", dur: "2.4s", begin: (i * 0.15) + "s", repeatCount: "indefinite" }, dot);
       }
@@ -395,7 +403,7 @@
     const lg = svg("g", {}, s);
     svg("circle", { cx: 570, cy: 70, r: 9, fill: C.blue }, lg);
     let t = svg("text", { x: 588, y: 75, fill: C.text, "font-size": 15, "font-weight": 600 }, lg); t.textContent = T({ en: "J-space: under 10%", hy: "J-տարածք՝ 10%-ից պակաս" });
-    svg("circle", { cx: 570, cy: 110, r: 9, fill: "#34343e" }, lg);
+    svg("circle", { cx: 570, cy: 110, r: 9, fill: C.dim }, lg);
     t = svg("text", { x: 588, y: 115, fill: C.text2, "font-size": 15 }, lg); t.textContent = T({ en: "everything else", hy: "մնացած ամեն ինչ" });
     t = svg("text", { x: 570, y: 165, fill: C.muted, "font-size": 13 }, lg); t.textContent = T({ en: "≈ a few dozen concepts", hy: "≈ մի քանի տասնյակ հասկացություն" });
     t = svg("text", { x: 570, y: 185, fill: C.muted, "font-size": 13 }, lg); t.textContent = T({ en: "at any moment", hy: "ցանկացած պահի" });
@@ -448,12 +456,12 @@
     ];
     rows.forEach((r) => {
       lab(x0 - 14, r.y + 5, r.name, { "text-anchor": "end", fill: C.text2, "font-size": 14 });
-      svg("line", { x1: x0, x2: x1, y1: r.y, y2: r.y, stroke: "#3a3a46", "stroke-width": 2 }, s);
+      svg("line", { x1: x0, x2: x1, y1: r.y, y2: r.y, stroke: C.off, "stroke-width": 2 }, s);
       const g = svg("g", { tabindex: 0 }, s);
       ["WARNING", "dangerous"].forEach((w, i) => {
         const bx = r.at + i * 112;
         svg("rect", { x: bx, y: r.y - 14, width: 104, height: 28, rx: 6, fill: "rgba(208,59,59,0.18)", stroke: "rgba(208,59,59,0.6)" }, g);
-        const t = svg("text", { x: bx + 52, y: r.y + 5, fill: "#f19a9a", "font-size": 13, "font-weight": 600, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace" }, g); t.textContent = w;
+        const t = svg("text", { x: bx + 52, y: r.y + 5, fill: C.warnText, "font-size": 13, "font-weight": 600, "text-anchor": "middle", "font-family": "JetBrains Mono, monospace" }, g); t.textContent = w;
       });
       Tip.bind(g, () => r.at < mid
         ? T({ en: "Lights up already while reading: Claude’s own reaction.", hy: "Վառվում է արդեն կարդալիս․ Claude-ի սեփական արձագանքը։" })
@@ -466,4 +474,5 @@
   }
   renderAll();
   document.addEventListener("langchange", renderAll);
+  document.addEventListener("themechange", renderAll);
 })();

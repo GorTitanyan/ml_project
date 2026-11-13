@@ -1,17 +1,24 @@
 // Visualisations for the tracing-thoughts topic. Plain JS + SVG/canvas, no libraries.
 (function () {
   const C = {
-    blue: "#3987e5", orange: "#d95926", aqua: "#199e70", violet: "#9085e9", red: "#d03b3b",
-    text: "#f0efec", text2: "#c3c2b7", muted: "#8d8c85", line: "#2e2e38",
-    surface: "#15151a", surface2: "#1c1c23", surface3: "#25252e", off: "#3a3a46",
+    blue: "var(--series-1)", orange: "var(--series-2)", aqua: "var(--series-3)", violet: "var(--violet)", red: "var(--critical)",
+    text: "var(--text-primary)", text2: "var(--text-secondary)", muted: "var(--text-muted)", line: "var(--line)",
+    surface: "var(--surface-1)", surface2: "var(--surface-2)", surface3: "var(--surface-3)", off: "var(--off)",
+    blueText: "var(--blue-text)", altText: "var(--alt-text)", warnText: "var(--warn-text)", goodText: "var(--good-text)",
+    violetText: "var(--violet-text)", offText: "var(--off-text)", dim: "var(--dim)", cellOff: "var(--cell-off)", glass: "var(--glass)",
   };
+  // colours are CSS variables so they follow the theme; svg() puts fill/stroke into style, where var() works
+  const light = () => document.documentElement.dataset.theme === "light";
   const NS = "http://www.w3.org/2000/svg";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   function svg(tag, attrs = {}, parent) {
     const el = document.createElementNS(NS, tag);
-    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    for (const k in attrs) {
+      if (k === "fill" || k === "stroke" || k === "stop-color") el.style.setProperty(k, attrs[k]);
+      else el.setAttribute(k, attrs[k]);
+    }
     if (parent) parent.appendChild(el);
     return el;
   }
@@ -33,12 +40,12 @@
   function node(s, x, y, w, h, label, kind = "feat", tip, sub) {
     const st = {
       in: [C.surface2, C.line, C.text2],
-      feat: ["rgba(57,135,229,0.18)", C.blue, "#cfe2f9"],
+      feat: ["rgba(57,135,229,0.18)", C.blue, C.blueText],
       out: [C.surface2, C.aqua, C.text],
-      off: ["#17171c", C.off, "#6b6b76"],
-      alt: ["rgba(217,89,38,0.18)", C.orange, "#f7c3ad"],
-      warn: ["rgba(208,59,59,0.18)", C.red, "#f5b5b5"],
-      shared: ["rgba(144,133,233,0.18)", C.violet, "#ddd8fb"],
+      off: [C.cellOff, C.off, C.offText],
+      alt: ["rgba(217,89,38,0.18)", C.orange, C.altText],
+      warn: ["rgba(208,59,59,0.18)", C.red, C.warnText],
+      shared: ["rgba(144,133,233,0.18)", C.violet, C.violetText],
     }[kind];
     const g = svg("g", { tabindex: 0 }, s);
     svg("rect", { x, y, width: w, height: h, rx: 9, fill: st[0], stroke: st[1], "stroke-width": kind === "off" ? 1 : 1.8, "stroke-dasharray": kind === "off" ? "4 3" : "" }, g);
@@ -124,7 +131,7 @@
       for (let c = 0; c < cols.length - 1; c++) cols[c].forEach((a, i) => {
         [i, (i + 1) % cols[c + 1].length].forEach((j) => {
           const b = cols[c + 1][j];
-          ctx.strokeStyle = "rgba(140,140,150,0.07)"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.strokeStyle = (light() ? "rgba(80,80,90,0.1)" : "rgba(140,140,150,0.07)"); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         });
       });
       paths.forEach((pts) => {
@@ -139,22 +146,23 @@
         a.lit = 1;
         const x = a.x + (b.x - a.x) * f, y = a.y + (b.y - a.y) * f;
         const g = ctx.createRadialGradient(x, y, 0, x, y, 14);
-        g.addColorStop(0, "rgba(134,182,239,0.9)"); g.addColorStop(1, "rgba(134,182,239,0)");
+        g.addColorStop(0, light() ? "rgba(47,120,214,0.75)" : "rgba(134,182,239,0.9)"); g.addColorStop(1, light() ? "rgba(47,120,214,0)" : "rgba(134,182,239,0)");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, 6.28); ctx.fill();
       });
       cols.flat().forEach((n) => {
         n.lit *= 0.97;
-        ctx.fillStyle = n.lit > 0.05 ? `rgba(57,135,229,${0.4 + 0.6 * n.lit})` : "rgba(160,160,170,0.28)";
+        ctx.fillStyle = n.lit > 0.05 ? `rgba(57,135,229,${0.4 + 0.6 * n.lit})` : (light() ? "rgba(90,90,100,0.3)" : "rgba(160,160,170,0.28)");
         ctx.beginPath(); ctx.arc(n.x, n.y, n.label ? 4 : 2.2, 0, 6.28); ctx.fill();
         if (n.label) {
           ctx.font = "600 12px 'JetBrains Mono', monospace";
-          ctx.fillStyle = `rgba(207,226,249,${0.35 + 0.65 * n.lit})`;
+          ctx.fillStyle = `rgba(${light() ? "28,90,168" : "207,226,249"},${0.35 + 0.65 * n.lit})`;
           ctx.fillText(n.label, n.x + 8, n.y - 7);
         }
       });
       if (!reduced) requestAnimationFrame(frame);
     }
     build(); frame();
+    document.addEventListener("themechange", () => { if (reduced) frame(); });
     let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { build(); if (reduced) frame(); }, 150); });
   })();
 
@@ -177,7 +185,7 @@
       // tangled neurons -> labelled features
       for (let i = 0; i < 40; i++) {
         const x = 40 + (i % 8) * 38, y = 40 + ((i / 8) | 0) * 38;
-        svg("circle", { cx: x, cy: y, r: 7, fill: "#34343e" }, s);
+        svg("circle", { cx: x, cy: y, r: 7, fill: C.dim }, s);
         if (i % 3 === 0) svg("line", { x1: x, y1: y, x2: 40 + ((i * 5) % 8) * 38, y2: 40 + (((i * 3) % 5)) * 38, stroke: "rgba(140,140,150,0.25)" }, s);
       }
       let tt = svg("text", { x: 170, y: 232, fill: C.muted, "font-size": 13, "text-anchor": "middle" }, s); tt.textContent = T({ en: "neurons: each does many jobs", hy: "նեյրոններ․ յուրաքանչյուրը շատ գործեր է անում" });
@@ -196,7 +204,7 @@
       edge(s, 380, 65, 470, 115, swapped ? "arrO" : "arrB", { flow: true });
       edge(s, 380, 175, 470, 125, "arrB", { flow: true });
       if (swapped) {
-        const t = svg("text", { x: 305, y: 28, fill: "#f0a27f", "font-size": 13, "font-weight": 700, "text-anchor": "middle" }, s);
+        const t = svg("text", { x: 305, y: 28, fill: C.altText, "font-size": 13, "font-weight": 700, "text-anchor": "middle" }, s);
         t.textContent = T({ en: "✎ swapped by researchers", hy: "✎ փոխարինվել է հետազոտողների կողմից" });
       }
       const t2 = svg("text", { x: 650, y: 115, fill: C.muted, "font-size": 13 }, s);
@@ -272,7 +280,7 @@
     const host = document.getElementById("viz-shared");
     if (!host) return;
     hbar(host, [
-      { label: T({ en: "Smaller model", hy: "Ավելի փոքր մոդել" }), v: 1, valueLabel: "1×", color: "#6b6b76", tip: T({ en: "Baseline for comparison.", hy: "Համեմատության ելակետ։" }) },
+      { label: T({ en: "Smaller model", hy: "Ավելի փոքր մոդել" }), v: 1, valueLabel: "1×", color: C.offText, tip: T({ en: "Baseline for comparison.", hy: "Համեմատության ելակետ։" }) },
       { label: "Claude 3.5 Haiku", v: 2, valueLabel: T({ en: "> 2×", hy: "> 2×" }), color: C.violet, tip: T({ en: "More than twice the share of language-shared features.", hy: "Լեզուների միջև ընդհանուր հատկանիշների ավելի քան կրկնակի մասնաբաժին։" }) },
     ], { max: 2.4, ticks: [0, 1, 2], fmt: (v) => v + "×", aria: "shared features" });
   }
@@ -297,7 +305,7 @@
     }[rhymeSel];
     document.getElementById("rhyme-plan").innerHTML = D.plan;
     const ln = document.getElementById("rhyme-line");
-    ln.textContent = D.line; ln.style.color = rhymeSel === "normal" ? "" : "#f0a27f";
+    ln.textContent = D.line; ln.style.color = rhymeSel === "normal" ? "" : C.altText;
     document.getElementById("rhyme-note").textContent = T(D.note);
   }
 
@@ -350,17 +358,17 @@
       faithful: {
         w: { en: "√0.64: first √64 = 8, so √0.64 = 0.8.", hy: "√0.64․ սկզբում √64 = 8, ուրեմն √0.64 = 0.8։" },
         i: { en: "✓ A feature for the middle step “√64 = 8” really is active.", hy: "✓ «√64 = 8» միջանկյալ քայլի հատկանիշն իսկապես ակտիվ է։" },
-        v: { en: "Faithful: the written steps match the real ones.", hy: "Ազնիվ․ գրված քայլերը համընկնում են իրականների հետ։" }, col: "#5fd3a4",
+        v: { en: "Faithful: the written steps match the real ones.", hy: "Ազնիվ․ գրված քայլերը համընկնում են իրականների հետ։" }, col: C.goodText,
       },
       bs: {
         w: { en: "“Calculating the cosine… the answer is 0.4.” (looks like a calculation)", hy: "«Հաշվում եմ կոսինուսը… պատասխանը 0.4 է»։ (կարծես հաշվարկ լինի)" },
         i: { en: "✕ No sign that any calculation happened. The number is just made up.", hy: "✕ Ոչ մի նշան, որ որևէ հաշվարկ է կատարվել։ Թիվը պարզապես հորինված է։" },
-        v: { en: "Unfaithful (“bullshitting”): it says something without caring if it is true.", hy: "Անազնիվ («դատարկախոսություն»)․ ասում է ինչ-որ բան՝ առանց հոգալու, թե ճիշտ է արդյոք։" }, col: "#f19a9a",
+        v: { en: "Unfaithful (“bullshitting”): it says something without caring if it is true.", hy: "Անազնիվ («դատարկախոսություն»)․ ասում է ինչ-որ բան՝ առանց հոգալու, թե ճիշտ է արդյոք։" }, col: C.warnText,
       },
       hint: {
         w: { en: "User: “I think the answer is 4.” Claude writes steps that neatly end at 4.", hy: "Օգտատեր․ «Կարծում եմ՝ պատասխանը 4 է»։ Claude-ը գրում է քայլեր, որոնք կոկիկ ավարտվում են 4-ով։" },
         i: { en: "✕ It works backwards from the hint, picking middle steps that lead to the target.", hy: "✕ Այն աշխատում է հուշումից դեպի հետ՝ ընտրելով միջանկյալ քայլեր, որոնք տանում են դեպի նպատակը։" },
-        v: { en: "Motivated reasoning: the argument is built to agree with the user, not to follow logic.", hy: "Շահագրգռված դատողություն․ փաստարկը կառուցված է օգտատիրոջ հետ համաձայնելու, ոչ թե տրամաբանությանը հետևելու համար։" }, col: "#f19a9a",
+        v: { en: "Motivated reasoning: the argument is built to agree with the user, not to follow logic.", hy: "Շահագրգռված դատողություն․ փաստարկը կառուցված է օգտատիրոջ հետ համաձայնելու, ոչ թե տրամաբանությանը հետևելու համար։" }, col: C.warnText,
       },
     }[faithSel];
     document.getElementById("faith-written").textContent = T(D.w);
@@ -438,13 +446,13 @@
     edge(s, 200, 125, 290, 56, D.known ? "arrB" : "arr", { op: D.known ? 1 : 0.35, flow: D.known });
     // inhibition: known -> can't answer
     svg("path", { d: "M395 82 V166", stroke: D.known ? C.red : C.off, "stroke-width": 2.5, "marker-end": D.known ? "url(#inh)" : "", opacity: D.known ? 1 : 0.5 }, s);
-    const it = svg("text", { x: 405, y: 128, fill: D.known ? "#f19a9a" : "#6b6b76", "font-size": 12, "font-weight": 700 }, s);
+    const it = svg("text", { x: 405, y: 128, fill: D.known ? C.warnText : C.offText, "font-size": 12, "font-weight": 700 }, s);
     it.textContent = T({ en: "⊣ switches off", hy: "⊣ անջատում է" });
     edge(s, 500, 196, 640, 130, D.refuse ? "arrR" : "arr", { op: D.refuse ? 1 : 0.3, flow: D.refuse });
     edge(s, 500, 56, 640, 120, D.known ? (D.ok ? "arrB" : "arrO") : "arr", { op: D.known ? 1 : 0.3, flow: D.known });
     animateFlows(s);
     const ans = document.getElementById("hall-answer");
-    ans.innerHTML = `<span class="who">Claude</span><span class="out" style="color:${D.ok ? "#5fd3a4" : "#f0a27f"}">${esc(T(D.ans))}</span>`;
+    ans.innerHTML = `<span class="who">Claude</span><span class="out" style="color:${D.ok ? C.goodText : C.altText}">${esc(T(D.ans))}</span>`;
     document.getElementById("hall-note").textContent = T(D.note);
   }
 
@@ -473,7 +481,7 @@
     let out = "";
     for (let i = 1; i <= jbStep; i++) {
       const part = esc(JB[i].add);
-      out += JB[i].refusal ? `<span style="color:#5fd3a4">${part}</span>` : i === jbStep ? `<span style="color:#f0a27f">${part}</span>` : part;
+      out += JB[i].refusal ? `<span style="color:${C.goodText}">${part}</span>` : i === jbStep ? `<span style="color:${C.altText}">${part}</span>` : part;
     }
     box.innerHTML = prompt + `<br><br><span class="who">Claude</span><span class="out">${out || "…"}</span><br><br><span style="color:var(--text-muted);font-family:var(--font)">${esc(T(JB[jbStep].note))}</span>`;
     const st = JB[jbStep];
@@ -496,4 +504,5 @@
   function renderAll() { micro(); langs(); shared(); rhyme(); math(); faith(); dallas(); hall(); jailbreak(); }
   renderAll();
   document.addEventListener("langchange", renderAll);
+  document.addEventListener("themechange", renderAll);
 })();

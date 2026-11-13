@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ML lessons — interactive research explainers</title>
-<meta name="title-en" content="ML lessons — interactive research explainers">
-<meta name="title-hy" content="ML դասեր — հետազոտությունների ինտերակտիվ բացատրություններ">
+<title>ML Research Seminar — what AI thinks, made visible</title>
+<meta name="title-en" content="ML Research Seminar — what AI thinks, made visible">
+<meta name="title-hy" content="ML հետազոտական սեմինար — ինչ է մտածում ԱԲ-ն, տեսանելի դարձած">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Armenian:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="index.html"><span class="brand-dot"></span><span lang="en">ML lessons</span><span lang="hy">ML դասեր</span></a>
+  <a class="brand" href="index.html"><img class="brand-logo logo-dark" src="assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="assets/logo-light.svg" alt="" width="30" height="30"><span lang="en">ML Research Seminar</span><span lang="hy">ML հետազոտական սեմինար</span></a>
   <div class="topbar-right">
     <div class="lang-switch" role="group" aria-label="Language">
       <button data-lang="en" aria-pressed="true">EN</button>
@@ -25,12 +26,12 @@
 
 <main class="wrap">
   <section class="home-hero">
-    <span class="kicker"><span lang="en">Machine learning · student presentations</span><span lang="hy">Մեքենայական ուսուցում · ուսանողական ներկայացումներ</span></span>
-    <h1><span lang="en">Research papers, explained with pictures you can play with</span><span lang="hy">Գիտական հոդվածներ՝ բացատրված պատկերներով, որոնց հետ կարելի է խաղալ</span></h1>
-    <p class="lead" lang="en" style="font-size:20px">Each topic retells one recent AI research article in plain words, with interactive demos, charts and tables, in English and Armenian.</p>
-    <p class="lead" lang="hy" style="font-size:20px">Յուրաքանչյուր թեմա պարզ բառերով վերապատմում է արհեստական բանականության մեկ նոր հետազոտական հոդված՝ ինտերակտիվ ցուցադրություններով, գծապատկերներով և աղյուսակներով, անգլերենով և հայերենով։</p>
+    <span class="kicker"><span lang="en">ML Research Seminar</span><span lang="hy">ML հետազոտական սեմինար</span></span>
+    <h1><span lang="en">What is an AI thinking before it speaks?</span><span lang="hy">Ի՞նչ է մտածում արհեստական բանականությունը, նախքան խոսելը</span></h1>
+    <p class="lead" lang="en" style="font-size:20px">Researchers have started to read the hidden thoughts of language models: what Claude plans before it writes, what it notices but never says, and when it is quietly cheating. Three studies, three stories, and a demo for every idea that you can click yourself.</p>
+    <p class="lead" lang="hy" style="font-size:20px">Հետազոտողներն սկսել են կարդալ լեզվական մոդելների թաքնված մտքերը․ ինչ է Claude-ը պլանավորում նախքան գրելը, ինչ է նկատում, բայց երբեք չի ասում, և երբ է լուռ խաբում։ Երեք հետազոտություն, երեք պատմություն և յուրաքանչյուր գաղափարի համար ցուցադրություն, որը կարող եք ինքներդ սեղմել։</p>
     <div class="team">
-      <span class="chip"><span lang="en">Team: Gor · Friend 2 · Friend 3</span><span lang="hy">Թիմ՝ Գոռ · Ընկեր 2 · Ընկեր 3</span></span>
+      <span class="chip"><span lang="en">Team: Gor · Aram · Artur</span><span lang="hy">Թիմ՝ Գոռ · Արամ · Արթուր</span></span>
     </div>
   </section>
 
@@ -43,15 +44,29 @@
           <line x1="120" y1="20" x2="200" y2="85"/><line x1="280" y1="150" x2="200" y2="85"/><line x1="20" y1="90" x2="200" y2="85"/><line x1="380" y1="95" x2="200" y2="85"/>
         </g>
         <circle cx="200" cy="85" r="60" fill="url(#g1)"/>
-        <g fill="#5a5a66"><circle cx="40" cy="30" r="3"/><circle cx="70" cy="140" r="3"/><circle cx="350" cy="40" r="3"/><circle cx="330" cy="140" r="3"/><circle cx="120" cy="20" r="3"/><circle cx="280" cy="150" r="3"/><circle cx="20" cy="90" r="3"/><circle cx="380" cy="95" r="3"/></g>
+        <g style="fill:var(--off-text)"><circle cx="40" cy="30" r="3"/><circle cx="70" cy="140" r="3"/><circle cx="350" cy="40" r="3"/><circle cx="330" cy="140" r="3"/><circle cx="120" cy="20" r="3"/><circle cx="280" cy="150" r="3"/><circle cx="20" cy="90" r="3"/><circle cx="380" cy="95" r="3"/></g>
         <circle cx="200" cy="85" r="7" fill="#3987e5"/>
-        <text x="214" y="78" fill="#cfe2f9" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">J-space</text>
+        <text style="fill:var(--blue-text)" x="214" y="78" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">J-space</text>
       </svg>
       <div class="body">
-        <span class="chip">Anthropic · 2026</span>
+        <span class="chip"><span lang="en">Topic 1 · Gor</span><span lang="hy">Թեմա 1 · Գոռ</span></span>
         <h3><span lang="en">A global workspace in language models</span><span lang="hy">Գլոբալ աշխատանքային տարածք լեզվական մոդելներում</span></h3>
-        <p lang="en">Claude has a tiny “stage” of thoughts it can report, control and reason with. How it was found, and how it helps catch hidden intentions.</p>
-        <p lang="hy">Claude-ն ունի մտքերի փոքրիկ «բեմ», որը կարող է հաղորդել, կառավարել և օգտագործել դատողության համար։ Ինչպես այն գտան, և ինչպես է այն օգնում բացահայտել թաքնված մտադրությունները։</p>
+        <p lang="en">Claude has a tiny “stage” of thoughts. How it was found, and how we know Claude can report it, control it and reason with it.</p>
+        <p lang="hy">Claude-ն ունի մտքերի փոքրիկ «բեմ»։ Ինչպես այն գտան, և ինչպես գիտենք, որ Claude-ը կարող է հաղորդել այն, կառավարել և դատել դրանով։</p>
+      </div>
+    </a>
+
+    <a class="topic" href="workspace-uses/index.html">
+      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g style="fill:var(--line)"><circle cx="56" cy="30" r="4"/><circle cx="72" cy="30" r="4"/><circle cx="88" cy="30" r="4"/><circle cx="104" cy="30" r="4"/><circle cx="120" cy="30" r="4"/><circle cx="136" cy="30" r="4"/><circle cx="152" cy="30" r="4"/><circle cx="168" cy="30" r="4"/><circle cx="184" cy="30" r="4"/><circle cx="200" cy="30" r="4"/><circle cx="232" cy="30" r="4"/><circle cx="248" cy="30" r="4"/><circle cx="264" cy="30" r="4"/><circle cx="280" cy="30" r="4"/><circle cx="296" cy="30" r="4"/><circle cx="312" cy="30" r="4"/><circle cx="328" cy="30" r="4"/><circle cx="40" cy="52" r="4"/><circle cx="56" cy="52" r="4"/><circle cx="72" cy="52" r="4"/><circle cx="88" cy="52" r="4"/><circle cx="104" cy="52" r="4"/><circle cx="120" cy="52" r="4"/><circle cx="136" cy="52" r="4"/><circle cx="152" cy="52" r="4"/><circle cx="168" cy="52" r="4"/><circle cx="184" cy="52" r="4"/><circle cx="200" cy="52" r="4"/><circle cx="216" cy="52" r="4"/><circle cx="232" cy="52" r="4"/><circle cx="248" cy="52" r="4"/><circle cx="264" cy="52" r="4"/><circle cx="280" cy="52" r="4"/><circle cx="296" cy="52" r="4"/><circle cx="312" cy="52" r="4"/><circle cx="344" cy="52" r="4"/><circle cx="40" cy="74" r="4"/><circle cx="56" cy="74" r="4"/><circle cx="72" cy="74" r="4"/><circle cx="88" cy="74" r="4"/><circle cx="104" cy="74" r="4"/><circle cx="120" cy="74" r="4"/><circle cx="152" cy="74" r="4"/><circle cx="168" cy="74" r="4"/><circle cx="184" cy="74" r="4"/><circle cx="200" cy="74" r="4"/><circle cx="216" cy="74" r="4"/><circle cx="232" cy="74" r="4"/><circle cx="248" cy="74" r="4"/><circle cx="264" cy="74" r="4"/><circle cx="280" cy="74" r="4"/><circle cx="296" cy="74" r="4"/><circle cx="312" cy="74" r="4"/><circle cx="328" cy="74" r="4"/><circle cx="344" cy="74" r="4"/><circle cx="40" cy="96" r="4"/><circle cx="56" cy="96" r="4"/><circle cx="72" cy="96" r="4"/><circle cx="88" cy="96" r="4"/><circle cx="104" cy="96" r="4"/><circle cx="136" cy="96" r="4"/><circle cx="152" cy="96" r="4"/><circle cx="168" cy="96" r="4"/><circle cx="184" cy="96" r="4"/><circle cx="200" cy="96" r="4"/><circle cx="216" cy="96" r="4"/><circle cx="232" cy="96" r="4"/><circle cx="264" cy="96" r="4"/><circle cx="280" cy="96" r="4"/><circle cx="296" cy="96" r="4"/><circle cx="312" cy="96" r="4"/><circle cx="328" cy="96" r="4"/><circle cx="344" cy="96" r="4"/><circle cx="40" cy="118" r="4"/><circle cx="56" cy="118" r="4"/><circle cx="72" cy="118" r="4"/><circle cx="88" cy="118" r="4"/><circle cx="104" cy="118" r="4"/><circle cx="120" cy="118" r="4"/><circle cx="136" cy="118" r="4"/><circle cx="152" cy="118" r="4"/><circle cx="168" cy="118" r="4"/><circle cx="184" cy="118" r="4"/><circle cx="200" cy="118" r="4"/><circle cx="216" cy="118" r="4"/><circle cx="248" cy="118" r="4"/><circle cx="264" cy="118" r="4"/><circle cx="280" cy="118" r="4"/><circle cx="296" cy="118" r="4"/><circle cx="312" cy="118" r="4"/><circle cx="328" cy="118" r="4"/><circle cx="344" cy="118" r="4"/></g>
+        <g fill="#3987e5"><circle cx="40" cy="30" r="4"/><circle cx="216" cy="30" r="4"/><circle cx="344" cy="30" r="4"/><circle cx="328" cy="52" r="4"/><circle cx="136" cy="74" r="4"/><circle cx="120" cy="96" r="4"/><circle cx="248" cy="96" r="4"/><circle cx="232" cy="118" r="4"/></g>
+        <text style="fill:var(--amber)" x="40" y="160" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600">safety · ablation · consciousness</text>
+      </svg>
+      <div class="body">
+        <span class="chip"><span lang="en">Topic 2 · Aram</span><span lang="hy">Թեմա 2 · Արամ</span></span>
+        <h3><span lang="en">What the workspace is for</span><span lang="hy">Ինչի համար է աշխատանքային տարածքը</span></h3>
+        <p lang="en">What breaks when the workspace is removed, how reading it catches a model that is hiding something, and what it says about consciousness.</p>
+        <p lang="hy">Ինչն է կոտրվում, երբ աշխատանքային տարածքը հեռացվում է, ինչպես է այն կարդալը բռնում ինչ-որ բան թաքցնող մոդելին, և ինչ է դա ասում գիտակցության մասին։</p>
       </div>
     </a>
 
@@ -61,13 +76,13 @@
           <path d="M40 85 C 90 85, 100 45, 150 45"/><path d="M40 85 C 90 85, 100 125, 150 125"/>
           <path d="M210 45 C 250 45, 250 85, 290 85"/><path d="M210 125 C 250 125, 250 85, 290 85"/>
         </g>
-        <rect x="10" y="70" width="60" height="30" rx="7" fill="#1c1c23" stroke="#2e2e38"/><text x="40" y="90" fill="#c3c2b7" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Dallas</text>
-        <rect x="150" y="30" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text x="185" y="50" fill="#cfe2f9" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Texas</text>
-        <rect x="150" y="110" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text x="185" y="130" fill="#cfe2f9" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">capital</text>
-        <rect x="290" y="70" width="80" height="30" rx="7" fill="#1c1c23" stroke="#199e70"/><text x="330" y="90" fill="#f0efec" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Austin</text>
+        <rect style="fill:var(--surface-2);stroke:var(--line)" x="10" y="70" width="60" height="30" rx="7"/><text style="fill:var(--text-secondary)" x="40" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Dallas</text>
+        <rect x="150" y="30" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="50" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Texas</text>
+        <rect x="150" y="110" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="130" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">capital</text>
+        <rect style="fill:var(--surface-2)" x="290" y="70" width="80" height="30" rx="7" stroke="#199e70"/><text style="fill:var(--text-primary)" x="330" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Austin</text>
       </svg>
       <div class="body">
-        <span class="chip">Anthropic · 2025</span>
+        <span class="chip"><span lang="en">Topic 3 · Artur</span><span lang="hy">Թեմա 3 · Արթուր</span></span>
         <h3><span lang="en">Tracing the thoughts of a large language model</span><span lang="hy">Մեծ լեզվական մոդելի մտքերի հետագծումը</span></h3>
         <p lang="en">An “AI microscope” shows how Claude plans rhymes, does mental maths, reasons in steps, hallucinates and falls for jailbreaks.</p>
         <p lang="hy">«ԱԲ մանրադիտակը» ցույց է տալիս, թե ինչպես է Claude-ը պլանավորում հանգերը, հաշվում մտքում, դատում քայլերով, հալյուցինացիաներ ունենում և խաբվում jailbreak-ներից։</p>
