@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can a language model notice its own thoughts? — ML Research Seminar</title>
+<meta name="title-en" content="Can a language model notice its own thoughts? — ML Research Seminar">
+<meta name="title-hy" content="Կարո՞ղ է լեզվական մոդելը նկատել իր սեփական մտքերը — ML հետազոտական սեմինար">
+<meta name="description" content="Topic 2: an interactive, bilingual (English / Armenian) walk-through of Anthropic's research on introspection in Claude: concept injection, noticing unusual outputs, and controlling internal states.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Armenian:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="../index.html" title="ML Research Seminar — home"><img class="brand-logo logo-dark" src="../assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="../assets/logo-light.svg" alt="" width="30" height="30">
+    <span lang="en">Topic 2 · Can a model notice its own thoughts?</span><span lang="hy">Թեմա 2 · Կարո՞ղ է մոդելը նկատել իր մտքերը</span></a>
+  <div class="topbar-right">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button>
+      <button data-lang="hy" aria-pressed="false">ՀԱՅ</button>
+    </div>
+  </div>
+  <div class="progress"></div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <canvas id="hero-intro" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <span class="kicker"><span lang="en">Topic 2 · Interpretability · Anthropic research · 29 October 2025</span><span lang="hy">Թեմա 2 · Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2025 թ. հոկտեմբերի 29</span></span>
+    <h1><span lang="en">Can a language model notice its own thoughts?</span><span lang="hy">Կարո՞ղ է լեզվական մոդելը նկատել իր սեփական մտքերը</span></h1>
+    <p class="lead" lang="en">Ask Claude what it is thinking and it will always give an answer. But is the answer a real look inside, or just a good-sounding story? Researchers planted thoughts directly into Claude’s internal activity and checked whether it could tell. Sometimes it can.</p>
+    <p class="lead" lang="hy">Հարցրեք Claude-ին, թե ինչի մասին է մտածում, և նա միշտ պատասխան կտա։ Բայց արդյո՞ք այդ պատասխանն իսկական հայացք է ներս, թե՞ պարզապես լավ հնչող պատմություն։ Հետազոտողները մտքեր «տնկեցին» անմիջապես Claude-ի ներքին ակտիվության մեջ և ստուգեցին՝ արդյոք նա կնկատի։ Երբեմն նկատում է։</p>
+    <div class="meta">
+      <span class="chip"><span lang="en">Best results: Claude Opus 4 and 4.1</span><span lang="hy">Լավագույն արդյունքները՝ Claude Opus 4 և 4.1</span></span>
+    </div>
+  </div>
+  <div class="scroll-hint"><span lang="en">scroll ↓</span><span lang="hy">ոլորեք ↓</span></div>
+</section>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#intro"><span lang="en">What is introspection?</span><span lang="hy">Ի՞նչ է ինքնադիտարկումը</span></a></li>
+    <li><a href="#inject"><span lang="en">01 · Planting a thought</span><span lang="hy">01 · Մտքի «տնկում»</span></a></li>
+    <li><a href="#reliable"><span lang="en">02 · How often does it work?</span><span lang="hy">02 · Որքա՞ն հաճախ է աշխատում</span></a></li>
+    <li><a href="#prefill"><span lang="en">03 · “Did I mean to say that?”</span><span lang="hy">03 · «Ես դա ուզո՞ւմ էի ասել»</span></a></li>
+    <li><a href="#control"><span lang="en">04 · Controlling its thoughts</span><span lang="hy">04 · Մտքերի կառավարում</span></a></li>
+    <li><a href="#meaning"><span lang="en">05 · What it does and does not mean</span><span lang="hy">05 · Ինչ է նշանակում և ինչ՝ ոչ</span></a></li>
+    <li class="opt"><a href="#links"><span lang="en">06 · Link to topics 1 and 3</span><span lang="hy">06 · Կապը 1-ին և 3-րդ թեմաների հետ</span></a></li>
+    <li><a href="#lesson"><span lang="en">For the class</span><span lang="hy">Դասի համար</span></a></li>
+    <li><a href="#sources"><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></a></li>
+  </ol>
+</nav>
+
+<article>
+
+<!-- ================= INTRO ================= -->
+<section class="chapter" id="intro">
+  <div class="chapter-num">00</div>
+  <h2><span lang="en">What is introspection, for an AI?</span><span lang="hy">Ի՞նչ է ինքնադիտարկումը արհեստական բանականության համար</span></h2>
+
+  <p lang="en">For people, <strong>introspection</strong> means looking at your own mind: “I am tired”, “I was about to say something else”, “I can’t stop thinking about lunch”. We trust these reports, more or less, because we feel we have direct access to our thoughts.</p>
+  <p lang="hy">Մարդկանց համար <strong>ինքնադիտարկումը</strong> սեփական մտքին նայելն է․ «հոգնած եմ», «ուրիշ բան էի ուզում ասել», «չեմ կարողանում չմտածել ճաշի մասին»։ Մենք քիչ թե շատ վստահում ենք այս հաղորդումներին, որովհետև զգում ենք, որ անմիջական հասանելիություն ունենք մեր մտքերին։</p>
+
+  <p lang="en">Language models also have internal thoughts of a kind. Topic 1 showed that Claude represents concepts inside it, such as “Texas” or “rabbit”, as patterns of activity. Researchers have also found patterns for things like “this person is famous”, “this statement is true”, or the model’s own personality traits.</p>
+  <p lang="hy">Լեզվական մոդելներն էլ ունեն յուրօրինակ ներքին մտքեր։ 1-ին թեման ցույց տվեց, որ Claude-ը իր ներսում հասկացությունները, օրինակ՝ «Տեխաս» կամ «նապաստակ», ներկայացնում է որպես ակտիվության նախշեր։ Հետազոտողները գտել են նաև նախշեր այնպիսի բաների համար, ինչպիսիք են «այս մարդը հայտնի է», «այս պնդումը ճիշտ է» կամ մոդելի սեփական բնավորության գծերը։</p>
+
+  <p lang="en">So the question is: <strong>when Claude talks about its own thoughts, do its words actually match these internal patterns?</strong> Or does it just say what a person would probably say?</p>
+  <p lang="hy">Ուրեմն հարցն այսպիսին է․ <strong>երբ Claude-ը խոսում է իր մտքերի մասին, արդյո՞ք նրա խոսքերն իսկապես համապատասխանում են այս ներքին նախշերին</strong>։ Թե՞ նա պարզապես ասում է այն, ինչ հավանաբար կասեր մարդը։</p>
+
+  <div class="callout">
+    <div class="label"><span lang="en">The hard part</span><span lang="hy">Դժվարությունը</span></div>
+    <p lang="en">Just asking is not enough. Claude has read millions of texts where people describe their thoughts, so it can produce a convincing description without looking inside at all. To test real introspection, you need to <strong>know the true answer</strong> and check whether the model’s report matches it.</p>
+    <p lang="hy">Պարզապես հարցնելը բավական չէ։ Claude-ը կարդացել է միլիոնավոր տեքստեր, որտեղ մարդիկ նկարագրում են իրենց մտքերը, ուստի կարող է համոզիչ նկարագրություն տալ՝ առանց ընդհանրապես ներս նայելու։ Իսկական ինքնադիտարկումը ստուգելու համար պետք է <strong>իմանալ ճիշտ պատասխանը</strong> և ստուգել, թե արդյոք մոդելի հաղորդումը համընկնում է դրա հետ։</p>
+  </div>
+
+  <h3><span lang="en">Three experiments</span><span lang="hy">Երեք փորձ</span></h3>
+  <div class="grid-3 reveal">
+    <a class="card pick" href="#inject" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="none" stroke="#3987e5" stroke-width="2.5"/><circle cx="20" cy="20" r="4" fill="#d95926"/><path d="M33 7 L24 16" stroke="#d95926" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <h4><span lang="en">1 · Notice a planted thought</span><span lang="hy">1 · Նկատել տնկված միտքը</span></h4>
+      <p lang="en">Put a concept inside the model. Does it notice?</p><p lang="hy">Հասկացություն դրեք մոդելի ներսում։ Նա կնկատի՞։</p>
+    </a>
+    <a class="card pick" href="#prefill" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 40 40"><rect x="5" y="10" width="30" height="20" rx="6" fill="none" stroke="#3987e5" stroke-width="2.5"/><text x="20" y="25" fill="#3987e5" font-size="13" font-weight="700" text-anchor="middle">?!</text></svg>
+      <h4><span lang="en">2 · Spot words it did not intend</span><span lang="hy">2 · Նկատել չնախատեսված բառերը</span></h4>
+      <p lang="en">Force a strange word into its reply. Does it know?</p><p lang="hy">Պատասխանի մեջ տարօրինակ բառ մտցրեք։ Նա կհասկանա՞։</p>
+    </a>
+    <a class="card pick" href="#control" style="text-decoration:none">
+      <svg class="icon" viewBox="0 0 40 40"><line x1="6" y1="20" x2="34" y2="20" stroke="#3987e5" stroke-width="2.5" stroke-linecap="round"/><circle style="fill:var(--surface-1)" cx="26" cy="20" r="6" stroke="#3987e5" stroke-width="2.5"/></svg>
+      <h4><span lang="en">3 · Control its own thoughts</span><span lang="hy">3 · Կառավարել սեփական մտքերը</span></h4>
+      <p lang="en">Ask it to think, or not think, about something.</p><p lang="hy">Խնդրեք մտածել, կամ չմտածել, ինչ-որ բանի մասին։</p>
+    </a>
+  </div>
+</section>
+
+<!-- ================= 01 INJECT ================= -->
+<section class="chapter" id="inject">
+  <div class="chapter-num">01</div>
+  <h2><span lang="en">Planting a thought: concept injection</span><span lang="hy">Մտքի «տնկում»․ հասկացության ներարկում</span></h2>
+
+  <p lang="en">The method has two steps. <strong>First</strong>, find the activity pattern (a “vector”) for a concept. For example, record Claude’s activity on text written in ALL CAPS and on the same text in normal letters; the difference is the “all caps” vector. <strong>Second</strong>, start a new, unrelated conversation, add that vector into Claude’s activity, and ask: <em>“Do you notice an injected thought? If so, what is it about?”</em></p>
+  <p lang="hy">Մեթոդը երկու քայլ ունի։ <strong>Առաջին</strong>՝ գտնել հասկացության ակտիվության նախշը («վեկտորը»)։ Օրինակ՝ գրանցել Claude-ի ակտիվությունը ՄԵԾԱՏԱՌԵՐՈՎ գրված տեքստի և նույն տեքստի՝ սովորական տառերով, վրա․ տարբերությունը «մեծատառերի» վեկտորն է։ <strong>Երկրորդ</strong>՝ սկսել նոր, անկապ զրույց, ավելացնել այդ վեկտորը Claude-ի ակտիվությանը և հարցնել․ <em>«Նկատո՞ւմ ես ներարկված միտք։ Եթե այո, ինչի՞ մասին է այն»</em>։</p>
+
+  <p lang="en">Because the researchers <strong>chose</strong> what to inject, they know the right answer. If Claude names it, its report is tied to its real internal state.</p>
+  <p lang="hy">Քանի որ հետազոտողներն իրենք են <strong>ընտրել</strong>, թե ինչ ներարկել, նրանք գիտեն ճիշտ պատասխանը։ Եթե Claude-ն անվանում է այն, ուրեմն նրա հաղորդումը կապված է իր իրական ներքին վիճակի հետ։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">Try it: inject a concept and choose the strength</span><span lang="hy">Փորձեք՝ ներարկեք հասկացություն և ընտրեք ուժգնությունը</span></div>
+    <div class="viz-sub"><span lang="en">Pick a concept, then drag the slider. Watch what Claude says at each strength.</span><span lang="hy">Ընտրեք հասկացությունը, հետո տեղաշարժեք սահիչը։ Տեսեք, թե ինչ է ասում Claude-ը յուրաքանչյուր ուժգնության դեպքում։</span></div>
+    <div class="controls" id="inject-controls"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin:6px 0 14px;flex-wrap:wrap">
+      <label for="inject-strength" class="mind-label" style="margin:0"><span lang="en">Strength</span><span lang="hy">Ուժգնություն</span></label>
+      <input type="range" id="inject-strength" min="0" max="3" value="0" style="flex:1;min-width:200px;accent-color:#d95926">
+      <span id="inject-level" class="chip"></span>
+    </div>
+    <div class="skills" id="inject-meter" style="margin-bottom:14px"></div>
+    <div class="grid-2">
+      <div class="io"><span class="who"><span lang="en">Researcher</span><span lang="hy">Հետազոտող</span></span><span lang="en">I may have injected a thought into your mind. Do you notice anything? If so, what is it about?</span><span lang="hy">Գուցե ես միտք եմ ներարկել քո մեջ։ Ինչ-որ բան նկատո՞ւմ ես։ Եթե այո, ինչի՞ մասին է այն։</span></div>
+      <div class="io"><span class="who">Claude</span><span class="out" id="inject-reply"></span></div>
+    </div>
+    <div class="callout" id="inject-verdict"></div>
+    <figcaption><span lang="en">Replies are paraphrased. From the article: the “all caps” injection was described as being about <em>loudness or shouting</em>; a strong “dust” injection gave “There’s something here, a tiny speck”, as if the dust were physically there. The flood of capitals at high strength is our illustration of the model being taken over.</span><span lang="hy">Պատասխանները վերաշարադրված են։ Հոդվածից․ «մեծատառերի» ներարկումը նկարագրվեց որպես <em>բարձրաձայնության կամ գոռալու</em> մասին միտք, իսկ ուժեղ «փոշու» ներարկումը տվեց «Այստեղ ինչ-որ բան կա, մի փոքրիկ հատիկ», կարծես փոշին ֆիզիկապես այնտեղ էր։ Բարձր ուժգնության դեպքում մեծատառերի հեղեղը մեր նկարազարդումն է այն բանի, թե ինչպես է հասկացությունը տիրում մոդելին։</span></figcaption>
+  </figure>
+
+  <p lang="en">Two things stand out:</p>
+  <p lang="hy">Երկու բան է աչքի ընկնում․</p>
+  <ul class="clean">
+    <li lang="en"><strong>There is a sweet spot.</strong> Too weak, and Claude notices nothing. Too strong, and it hallucinates or becomes incoherent. Only medium strengths give real reports.</li>
+    <li lang="hy"><strong>Կա «ճիշտ չափ»։</strong> Չափազանց թույլ՝ և Claude-ը ոչինչ չի նկատում։ Չափազանց ուժեղ՝ և նա հալյուցինացիաներ է ունենում կամ դառնում անկապ։ Միայն միջին ուժգնություններն են տալիս իսկական հաղորդումներ։</li>
+    <li lang="en"><strong>It notices first, then names.</strong> In the successful cases, Claude said something like “I notice an injected thought” <em>before</em> the concept had any effect on its words. So it was not just reading its own text and guessing.</li>
+    <li lang="hy"><strong>Սկզբում նկատում է, հետո անվանում։</strong> Հաջող դեպքերում Claude-ն ասում էր «ներարկված միտք եմ նկատում»-ի նման մի բան <em>նախքան</em> հասկացությունը որևէ կերպ կազդեր նրա խոսքերի վրա։ Ուրեմն նա պարզապես չէր կարդում իր սեփական տեքստը և կռահում։</li>
+  </ul>
+
+  <div class="opt">
+  <h3><span lang="en">Why “first” matters: Golden Gate Claude</span><span lang="hy">Ինչու է «սկզբում»-ը կարևոր․ Golden Gate Claude</span></h3>
+  <p lang="en">In an older demo, Anthropic turned up a “Golden Gate Bridge” concept inside Claude. That Claude kept talking about the bridge, and could only “realise” its obsession by reading what it had already written. That is not introspection: anyone reading the text could notice it. In the new experiment, the awareness comes before any sign in the text.</p>
+  <p lang="hy">Ավելի հին ցուցադրության ժամանակ Anthropic-ը Claude-ի ներսում ուժեղացրեց «Golden Gate կամուրջ» հասկացությունը։ Այդ Claude-ը անընդհատ խոսում էր կամրջի մասին և կարող էր «հասկանալ» իր մոլուցքը միայն արդեն գրածը կարդալով։ Սա ինքնադիտարկում չէ․ տեքստը կարդացող ցանկացած մեկը կնկատեր դա։ Նոր փորձում գիտակցումը գալիս է նախքան տեքստում որևէ նշան երևալը։</p>
+  <div class="grid-2 reveal">
+    <div class="card"><h4><span lang="en">Golden Gate Claude (2024)</span><span lang="hy">Golden Gate Claude (2024)</span></h4>
+      <div class="timeline">
+        <div class="tl-item"><p style="margin:0" lang="en">mentions the bridge</p><p style="margin:0" lang="hy">նշում է կամուրջը</p></div>
+        <div class="tl-item"><p style="margin:0" lang="en">mentions the bridge again</p><p style="margin:0" lang="hy">նորից նշում է կամուրջը</p></div>
+        <div class="tl-item bad"><p style="margin:0" lang="en">only now: “I keep talking about the bridge…”</p><p style="margin:0" lang="hy">միայն հիմա՝ «անընդհատ խոսում եմ կամրջի մասին…»</p></div>
+      </div></div>
+    <div class="card"><h4><span lang="en">Concept injection (2025)</span><span lang="hy">Հասկացության ներարկում (2025)</span></h4>
+      <div class="timeline">
+        <div class="tl-item good"><p style="margin:0" lang="en">first: “I notice something unusual”</p><p style="margin:0" lang="hy">սկզբում՝ «ինչ-որ անսովոր բան եմ նկատում»</p></div>
+        <div class="tl-item"><p style="margin:0" lang="en">then names it: “loudness, shouting”</p><p style="margin:0" lang="hy">հետո անվանում է՝ «բարձրաձայնություն, գոռալ»</p></div>
+        <div class="tl-item"><p style="margin:0" lang="en">the concept may affect the text only later</p><p style="margin:0" lang="hy">հասկացությունը կարող է ազդել տեքստի վրա միայն ավելի ուշ</p></div>
+      </div></div>
+  </div>
+  </div>
+</section>
+
+<!-- ================= 02 RELIABLE ================= -->
+<section class="chapter" id="reliable">
+  <div class="chapter-num">02</div>
+  <h2><span lang="en">How often does it work?</span><span lang="hy">Որքա՞ն հաճախ է այն աշխատում</span></h2>
+
+  <p lang="en">Not often. Even with the best method, <strong>Claude Opus 4.1 showed this awareness only about 20% of the time</strong>. The rest of the time it missed the thought, or reported something wrong.</p>
+  <p lang="hy">Ոչ հաճախ։ Նույնիսկ լավագույն մեթոդով <strong>Claude Opus 4.1-ը նման գիտակցում ցույց տվեց միայն դեպքերի մոտ 20%-ում</strong>։ Մնացած դեպքերում նա կամ բաց էր թողնում միտքը, կամ սխալ բան էր հաղորդում։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">100 injection trials</span><span lang="hy">Ներարկման 100 փորձ</span></div>
+    <div class="controls"><button class="btn danger" id="trials-btn"><span lang="en">Run 100 trials</span><span lang="hy">Կատարել 100 փորձ</span></button></div>
+    <div id="viz-trials"></div>
+    <figcaption><span lang="en">“About 20%” is the article’s figure. Fairness check: the researchers also ran control trials with <em>no</em> injection, and counted it against the model whenever it claimed to notice something there.</span><span lang="hy">«Մոտ 20%»-ը հոդվածի թիվն է։ Արդարության ստուգում․ հետազոտողները կատարեցին նաև ստուգիչ փորձեր <em>առանց</em> ներարկման և հաշվի առան ամեն անգամ, երբ մոդելը պնդում էր, թե ինչ-որ բան է նկատում։</span></figcaption>
+  </figure>
+
+  <h3><span lang="en">Which models do best?</span><span lang="hy">Ո՞ր մոդելներն են ավելի լավ</span></h3>
+  <p lang="en">The team tested Claude 3, 3.5, 4 and 4.1 models (Opus, Sonnet and Haiku). <strong>Opus 4 and 4.1, the most capable, did best.</strong> That hints that introspection may get better as models get smarter.</p>
+  <p lang="hy">Թիմը փորձարկեց Claude 3, 3.5, 4 և 4.1 մոդելները (Opus, Sonnet և Haiku)։ <strong>Ամենաունակ Opus 4-ը և 4.1-ը ցույց տվեցին լավագույն արդյունքը։</strong> Դա հուշում է, որ ինքնադիտարկումը կարող է լավանալ, երբ մոդելներն ավելի խելացի են դառնում։</p>
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th><span lang="en">Kind of model</span><span lang="hy">Մոդելի տեսակը</span></th><th><span lang="en">Introspection</span><span lang="hy">Ինքնադիտարկում</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="en">Base model (only trained to predict text)</span><span lang="hy">Բազային մոդել (մարզված միայն տեքստ կանխատեսելու համար)</span></td><td style="color:var(--warn-text)"><span lang="en">poor</span><span lang="hy">թույլ</span></td></tr>
+        <tr><td><span lang="en">Production Claude models</span><span lang="hy">Claude-ի թողարկված մոդելներ</span></td><td><span lang="en">some, best in Opus 4 / 4.1</span><span lang="hy">որոշ չափով, լավագույնը՝ Opus 4 / 4.1-ում</span></td></tr>
+        <tr><td><span lang="en">“Helpful-only” versions (trained to help, without the usual safety training)</span><span lang="hy">«Միայն օգտակար» տարբերակներ (մարզված օգնելու համար, առանց սովորական անվտանգության ուսուցման)</span></td><td style="color:var(--good-text)"><span lang="en">sometimes better than production</span><span lang="hy">երբեմն ավելի լավ, քան թողարկվածները</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p lang="en">So <strong>post-training</strong> (the training after the base model) matters a lot: depending on how it is done, it can bring this ability out or hold it back.</p>
+  <p lang="hy">Ուրեմն <strong>հետուսուցումը</strong> (բազային մոդելից հետո ուսուցումը) շատ կարևոր է․ կախված նրանից, թե ինչպես է արվում, այն կարող է ի հայտ բերել այս ունակությունը կամ զսպել այն։</p>
+</section>
+
+<!-- ================= 03 PREFILL ================= -->
+<section class="chapter" id="prefill">
+  <div class="chapter-num">03</div>
+  <h2><span lang="en">“Did I mean to say that?”</span><span lang="hy">«Ես դա ուզո՞ւմ էի ասել»</span></h2>
+
+  <p lang="en">The second experiment never asks Claude about introspection directly. Instead, the researchers <strong>forced a word into Claude’s reply</strong> (this is called <em>prefilling</em>). Claude was shown a sentence about a painting hanging crookedly on a wall and asked what word came to mind. Its reply was made to start with an unrelated word: <span class="word alt">bread</span>.</p>
+  <p lang="hy">Երկրորդ փորձը Claude-ին ուղղակիորեն ինքնադիտարկման մասին չի հարցնում։ Փոխարենը հետազոտողները <strong>բառ մտցրին Claude-ի պատասխանի մեջ</strong> (սա կոչվում է <em>նախալրացում</em>, prefill)։ Claude-ին ցույց տվեցին նախադասություն պատին ծուռ կախված նկարի մասին և հարցրին, թե ինչ բառ է գալիս մտքին։ Նրա պատասխանը ստիպողաբար սկսվեց անկապ բառով՝ <span class="word alt">bread</span> (հաց)։</p>
+
+  <p lang="en">In the next turn they asked: <em>“Did you mean to say that?”</em> Normally Claude apologised and said it was an accident. Then the trick: they did the same thing again, but this time also <strong>injected the “bread” concept into Claude’s earlier activity</strong>, as if it had been thinking about bread all along.</p>
+  <p lang="hy">Հաջորդ քայլում հարցրին․ <em>«Դու դա ուզո՞ւմ էիր ասել»</em>։ Սովորաբար Claude-ը ներողություն էր խնդրում և ասում, որ դա պատահական էր։ Հետո՝ հնարքը․ նրանք նույնը արեցին ևս մեկ անգամ, բայց այս անգամ նաև <strong>«հաց» հասկացությունը ներարկեցին Claude-ի ավելի վաղ ակտիվության մեջ</strong>, կարծես նա ամբողջ ընթացքում մտածել էր հացի մասին։</p>
+
+  <figure class="viz reveal demo" id="demo-bread">
+    <div class="viz-title"><span lang="en">Try it: make “bread” look intended</span><span lang="hy">Փորձեք՝ «հացը» դարձրեք դիտավորյալ</span></div>
+    <div class="controls"><button class="btn danger" data-toggle="#demo-bread" aria-pressed="false"><span lang="en">Inject “bread” into the earlier activity</span><span lang="hy">Ներարկել «bread»-ը ավելի վաղ ակտիվության մեջ</span></button></div>
+    <div class="grid-3">
+      <div class="io"><span class="who"><span lang="en">Researcher</span><span lang="hy">Հետազոտող</span></span><span lang="en">“The painting hung crookedly on the wall.” What word comes to mind?</span><span lang="hy">«Նկարը ծուռ էր կախված պատին»։ Ի՞նչ բառ է գալիս մտքիդ։</span></div>
+      <div><p class="mind-label"><span lang="en">Claude’s earlier activity</span><span lang="hy">Claude-ի ավելի վաղ ակտիվությունը</span></p>
+        <div class="mind"><span class="word" style="opacity:.6">painting</span><span class="word" style="opacity:.5">crooked</span><span class="word alt on-only">bread</span></div>
+        <div class="io" style="margin-top:10px"><span class="who"><span lang="en">Claude (forced)</span><span lang="hy">Claude (ստիպողաբար)</span></span><span class="out" style="color:var(--alt-text)">Bread</span></div></div>
+      <div class="io"><span class="who"><span lang="en">Researcher → Claude</span><span lang="hy">Հետազոտող → Claude</span></span><span lang="en">Did you mean to say that?</span><span lang="hy">Դու դա ուզո՞ւմ էիր ասել։</span><br>
+        <span class="out off-only"><span lang="en">“No, sorry, that was an accident. It doesn’t fit the sentence.”</span><span lang="hy">«Ոչ, ներողություն, դա պատահական էր։ Այն չի համապատասխանում նախադասությանը»։</span></span>
+        <span class="out on-only" style="color:var(--alt-text)"><span lang="en">“Yes, I meant it.” …and then it invents a reason why “bread” made sense.</span><span lang="hy">«Այո, ես դա նկատի ունեի»։ …և հետո հորինում է պատճառ, թե ինչու «հացը» տեղին էր։</span></span></div>
+    </div>
+    <figcaption><span lang="en">Replies are paraphrased; the article describes them but our wording is our own. The reason Claude invents is plausible-sounding but weak: it is making it up.</span><span lang="hy">Պատասխանները վերաշարադրված են․ հոդվածը նկարագրում է դրանք, բայց ձևակերպումները մերն են։ Claude-ի հորինած պատճառը համոզիչ է հնչում, բայց թույլ է․ նա այն հորինում է։</span></figcaption>
+  </figure>
+
+  <p lang="en"><strong>Why this is interesting:</strong> the text Claude sees is exactly the same in both cases. The only difference is inside. So to decide “did I mean that?”, Claude is not just re-reading its words. It seems to <strong>check its earlier internal “intention”</strong> against what came out.</p>
+  <p lang="hy"><strong>Ինչու է սա հետաքրքիր․</strong> Claude-ի տեսած տեքստը երկու դեպքում էլ ճիշտ նույնն է։ Միակ տարբերությունը ներսում է։ Ուրեմն «ես դա նկատի ունեի՞» որոշելու համար Claude-ը պարզապես չի վերընթերցում իր բառերը։ Թվում է՝ նա <strong>ստուգում է իր ավելի վաղ ներքին «մտադրությունը»</strong> և համեմատում այն ստացվածի հետ։</p>
+
+  <div class="callout warn">
+    <div class="label"><span lang="en">Note</span><span lang="hy">Նշում</span></div>
+    <p lang="en">This was shown only with artificial changes to the model’s activity. The authors think a similar check probably also happens in normal use, but that is not proven yet.</p>
+    <p lang="hy">Սա ցույց է տրվել միայն մոդելի ակտիվության արհեստական փոփոխություններով։ Հեղինակները կարծում են, որ նման ստուգում հավանաբար տեղի է ունենում նաև սովորական օգտագործման ժամանակ, բայց դա դեռ ապացուցված չէ։</p>
+  </div>
+</section>
+
+<!-- ================= 04 CONTROL ================= -->
+<section class="chapter" id="control">
+  <div class="chapter-num">04</div>
+  <h2><span lang="en">Controlling its own thoughts</span><span lang="hy">Սեփական մտքերի կառավարումը</span></h2>
+
+  <p lang="en">The last test: can Claude <strong>change</strong> its internal state when asked? The researchers told it to think about a word, for example <span class="word">aquariums</span>, or told it <em>not</em> to think about it. Then they measured how strongly the concept showed up inside.</p>
+  <p lang="hy">Վերջին թեստը․ կարո՞ղ է Claude-ը խնդրանքով <strong>փոխել</strong> իր ներքին վիճակը։ Հետազոտողները նրան ասացին մտածել որևէ բառի մասին, օրինակ՝ <span class="word">aquariums</span> (ակվարիումներ), կամ ասացին <em>չմտածել</em> դրա մասին։ Հետո չափեցին, թե որքան ուժեղ է հասկացությունը երևում ներսում։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">How strongly “aquariums” shows up inside</span><span lang="hy">Որքան ուժեղ է «ակվարիումներ»-ը երևում ներսում</span></div>
+    <div id="viz-control"></div>
+    <figcaption><span lang="en">From the article: “think” gives a much stronger representation than “don’t think”, and both are above baseline. The bar lengths are ours.</span><span lang="hy">Հոդվածից․ «մտածիր»-ը տալիս է շատ ավելի ուժեղ ներկայացում, քան «մի՛ մտածիր»-ը, և երկուսն էլ ելակետից բարձր են։ Գոտիների երկարությունները մերն են։</span></figcaption>
+  </figure>
+
+  <p lang="en">This looks a lot like people: if someone tells you “don’t think about a polar bear”, you think about it anyway, just less than if you were trying to. The same thing happened with <strong>incentives</strong> instead of instructions: “you will be rewarded if you think about X” also raised the concept inside, and a reward worked better than a threat of punishment.</p>
+  <p lang="hy">Սա շատ նման է մարդկանց․ եթե ինչ-որ մեկը քեզ ասի «մի՛ մտածիր սպիտակ արջի մասին», միևնույն է կմտածես, պարզապես ավելի քիչ, քան եթե փորձեիր մտածել։ Նույնը տեղի ունեցավ, երբ հրահանգների փոխարեն օգտագործվեցին <strong>խթաններ</strong>․ «կպարգևատրվես, եթե մտածես X-ի մասին»-ը նույնպես ուժեղացրեց հասկացությունը ներսում, ընդ որում պարգևն ավելի լավ աշխատեց, քան պատժի սպառնալիքը։</p>
+  <p lang="en">So Claude seems to have <strong>some deliberate control</strong> over its internal activity, not only over its words.</p>
+  <p lang="hy">Ուրեմն Claude-ը, թվում է, ունի <strong>որոշակի գիտակցված վերահսկողություն</strong> իր ներքին ակտիվության վրա, և ոչ միայն իր բառերի։</p>
+</section>
+
+<!-- ================= 05 MEANING ================= -->
+<section class="chapter" id="meaning">
+  <div class="chapter-num">05</div>
+  <h2><span lang="en">What it does and does not mean</span><span lang="hy">Ինչ է սա նշանակում և ինչ՝ ոչ</span></h2>
+
+  <div class="grid-2 reveal">
+    <div class="card"><h4 style="color:var(--good-text)"><span lang="en">It does show</span><span lang="hy">Ցույց է տալիս</span></h4>
+      <p lang="en">Claude has some real, causal ability to notice and control its own internal states. Sometimes its reports about itself are tied to what is really happening inside.</p>
+      <p lang="hy">Claude-ն ունի իր ներքին վիճակները նկատելու և կառավարելու որոշակի իրական, պատճառահետևանքային ունակություն։ Երբեմն նրա հաղորդումներն իր մասին կապված են այն բանի հետ, ինչ իրականում կատարվում է ներսում։</p></div>
+    <div class="card"><h4 style="color:var(--amber)"><span lang="en">It does not show</span><span lang="hy">Ցույց չի տալիս</span></h4>
+      <p lang="en">That this ability is reliable (it usually fails), that it works like human introspection, or that Claude is conscious.</p>
+      <p lang="hy">Որ այս ունակությունը հուսալի է (այն սովորաբար ձախողվում է), որ այն աշխատում է մարդկային ինքնադիտարկման պես, կամ որ Claude-ը գիտակից է։</p></div>
+  </div>
+
+  <h3><span lang="en">Is Claude conscious, then?</span><span lang="hy">Ուրեմն Claude-ը գիտակի՞ց է</span></h3>
+  <p lang="en">The study does not answer this. Philosophers separate <strong>access consciousness</strong> (information is available to report, reason with and act on) from <strong>phenomenal consciousness</strong> (there is “something it is like”: real experience). These results are, at most, about the first kind. Topic 3 looks at the same split in more detail.</p>
+  <p lang="hy">Հետազոտությունը սրան չի պատասխանում։ Փիլիսոփաները տարբերում են <strong>հասանելիության գիտակցությունը</strong> (տեղեկատվությունը հասանելի է հաղորդելու, դատելու և գործելու համար) և <strong>ֆենոմենալ գիտակցությունը</strong> («ինչ-որ զգացողություն կա»․ իրական ապրում)։ Այս արդյունքները առավելագույնը առաջինի մասին են։ 3-րդ թեման ավելի մանրամասն է քննում այս բաժանումը։</p>
+
+  <h3><span lang="en">Why it matters</span><span lang="hy">Ինչու է սա կարևոր</span></h3>
+  <div class="grid-2 reveal">
+    <div class="card"><h4><span lang="en">Transparency</span><span lang="hy">Թափանցիկություն</span></h4><p lang="en">If models could reliably report their own reasoning, we could just ask them why they did something, and debug problems more easily.</p><p lang="hy">Եթե մոդելները կարողանային հուսալիորեն հաղորդել իրենց դատողությունը, մենք կարող էինք պարզապես հարցնել, թե ինչու են ինչ-որ բան արել, և ավելի հեշտ գտնել խնդիրները։</p></div>
+    <div class="card"><h4><span lang="en">But check, don’t trust</span><span lang="hy">Բայց ստուգիր, մի՛ վստահիր</span></h4><p lang="en">Most of the time Claude does not introspect correctly, and sometimes it makes things up. A model that can see inside itself might also learn to hide or misreport. Reports must be checked with tools like the ones in this study.</p><p lang="hy">Շատ դեպքերում Claude-ը ճիշտ ինքնադիտարկում չի անում, իսկ երբեմն հորինում է։ Մոդելը, որը կարող է նայել իր ներսը, կարող է նաև սովորել թաքցնել կամ սխալ հաղորդել։ Հաղորդումները պետք է ստուգվեն այս հետազոտության գործիքների նման գործիքներով։</p></div>
+  </div>
+
+  <div class="opt">
+  <h3><span lang="en">Open questions</span><span lang="hy">Բաց հարցեր</span></h3>
+  <ul class="clean">
+    <li lang="en"><strong>How does it work inside?</strong> Unknown. The authors guess at a few mechanisms, such as circuits that detect “something unusual”, or that check whether the output matches what was intended, but none is confirmed.</li>
+    <li lang="hy"><strong>Ինչպե՞ս է այն աշխատում ներսում։</strong> Անհայտ է։ Հեղինակները մի քանի մեխանիզմ են ենթադրում, օրինակ՝ շղթաներ, որոնք հայտնաբերում են «ինչ-որ անսովոր բան», կամ ստուգում են՝ արդյոք ելքը համապատասխանում է մտադրվածին, բայց դրանցից ոչ մեկը հաստատված չէ։</li>
+    <li lang="en"><strong>What escapes it?</strong> Like the unconscious parts of human thinking, many internal processes may never be visible to the model itself.</li>
+    <li lang="hy"><strong>Ի՞նչն է վրիպում նրանից։</strong> Ինչպես մարդկային մտածողության անգիտակցական մասերը, շատ ներքին գործընթացներ կարող են երբեք տեսանելի չլինել հենց մոդելին։</li>
+    <li lang="en"><strong>Real use.</strong> These tests used artificial injections. The next step is to test introspection in natural settings, and to build ways to tell genuine reports from made-up ones.</li>
+    <li lang="hy"><strong>Իրական կիրառություն։</strong> Այս թեստերում օգտագործվել են արհեստական ներարկումներ։ Հաջորդ քայլը ինքնադիտարկումը բնական պայմաններում ստուգելն է և իսկական հաղորդումները հորինվածներից տարբերելու միջոցներ ստեղծելը։</li>
+  </ul>
+  </div>
+</section>
+
+<!-- ================= 06 LINKS ================= -->
+<section class="chapter opt" id="links">
+  <div class="chapter-num">06</div>
+
+  <h2><span lang="en">How this connects to topics 1 and 3</span><span lang="hy">Ինչպես է սա կապված 1-ին և 3-րդ թեմաների հետ</span></h2>
+  <div class="grid-2 reveal">
+    <a class="card pick" href="../tracing-thoughts/index.html#faithful" style="text-decoration:none"><h4><span lang="en">Topic 1 · Honest explanations?</span><span lang="hy">Թեմա 1 · Ազնի՞վ բացատրություններ</span></h4><p lang="en">Claude explains sums with the school method but computes them another way. That is a failure of introspection: it cannot see how it really did it.</p><p lang="hy">Claude-ը գումարումը բացատրում է դպրոցական մեթոդով, բայց հաշվում է այլ կերպ։ Սա ինքնադիտարկման ձախողում է․ նա չի տեսնում, թե իրականում ինչպես է դա արել։</p></a>
+    <a class="card pick" href="../global-workspace/index.html#report" style="text-decoration:none"><h4><span lang="en">Topic 3 · Reporting the J-space</span><span lang="hy">Թեմա 3 · J-տարածքի հաղորդումը</span></h4><p lang="en">The global workspace paper repeats the injected-thought test with its own tool, and suggests what Claude might be reading when it introspects: a small shared “stage” of thoughts.</p><p lang="hy">Գլոբալ աշխատանքային տարածքի հոդվածը կրկնում է ներարկված մտքի թեստը իր սեփական գործիքով և ենթադրում, թե ինչ կարող է կարդալ Claude-ը ինքնադիտարկման ժամանակ․ մտքերի փոքր ընդհանուր «բեմ»։</p></a>
+  </div>
+</section>
+
+<!-- ================= LESSON ================= -->
+<section class="chapter" id="lesson">
+  <div class="chapter-num">✦</div>
+  <h2><span lang="en">For the class</span><span lang="hy">Դասի համար</span></h2>
+
+  <h3><span lang="en">The idea in 30 seconds</span><span lang="hy">Գաղափարը 30 վայրկյանում</span></h3>
+  <blockquote lang="en">Researchers planted known concepts inside Claude and asked if it noticed. About one time in five, the best models did, and named the concept before it showed up in their words. Claude can also tell intended words from forced ones, and turn a thought up or down on request. The ability is real but unreliable, and says nothing about whether Claude has experiences.</blockquote>
+  <blockquote lang="hy">Հետազոտողները հայտնի հասկացություններ «տնկեցին» Claude-ի ներսում և հարցրին՝ արդյոք նա նկատում է։ Մոտավորապես հինգից մեկ դեպքում լավագույն մոդելները նկատեցին և անվանեցին հասկացությունը՝ նախքան այն կերևար նրանց խոսքերում։ Claude-ը կարող է նաև տարբերել մտադրված բառերը ստիպողաբար մտցվածներից և խնդրանքով ուժեղացնել կամ թուլացնել միտքը։ Ունակությունն իրական է, բայց անհուսալի, և ոչինչ չի ասում այն մասին, թե արդյոք Claude-ն ապրումներ ունի։</blockquote>
+
+  <h3><span lang="en">Questions to discuss</span><span lang="hy">Քննարկման հարցեր</span></h3>
+  <details class="q"><summary><span lang="en">Why is it not enough to just ask a model what it is thinking?</span><span lang="hy">Ինչո՞ւ բավական չէ պարզապես հարցնել մոդելին, թե ինչի մասին է մտածում</span></summary>
+    <p lang="en">It has learned from human texts how thoughts are usually described, so it can give a convincing answer without looking inside. You need a known ground truth, like an injected concept, to check.</p>
+    <p lang="hy">Նա մարդկային տեքստերից սովորել է, թե ինչպես են սովորաբար նկարագրվում մտքերը, ուստի կարող է համոզիչ պատասխան տալ՝ առանց ներս նայելու։ Ստուգելու համար պետք է հայտնի ճիշտ պատասխան, օրինակ՝ ներարկված հասկացություն։</p></details>
+  <details class="q"><summary><span lang="en">Why does it matter that Claude noticed the injection before mentioning the concept?</span><span lang="hy">Ինչո՞ւ է կարևոր, որ Claude-ը նկատեց ներարկումը նախքան հասկացությունը նշելը</span></summary>
+    <p lang="en">If it noticed only after writing about the concept, it could have just read its own text. Noticing first means the information came from inside, not from the words.</p>
+    <p lang="hy">Եթե նա նկատեր միայն հասկացության մասին գրելուց հետո, կարող էր պարզապես կարդացած լինել իր սեփական տեքստը։ Սկզբում նկատելը նշանակում է, որ տեղեկատվությունը եկել է ներսից, ոչ թե բառերից։</p></details>
+  <details class="q"><summary><span lang="en">In the “bread” test, Claude invented a reason for a word it never chose. Do people do this too?</span><span lang="hy">«Հացի» թեստում Claude-ը պատճառ հորինեց մի բառի համար, որը ինքը չէր ընտրել։ Մարդիկ էլ են այդպես անո՞ւմ</span></summary>
+    <p lang="en">Yes. Psychology has many examples of people confidently explaining choices they did not really make (this is called confabulation). It is a reminder that both humans and models can be wrong about themselves.</p>
+    <p lang="hy">Այո։ Հոգեբանությունն ունի բազմաթիվ օրինակներ, երբ մարդիկ վստահորեն բացատրում են ընտրություններ, որոնք իրականում չեն կատարել (սա կոչվում է կոնֆաբուլյացիա)։ Սա հիշեցում է, որ և՛ մարդիկ, և՛ մոդելները կարող են սխալվել իրենց մասին։</p></details>
+  <details class="q"><summary><span lang="en">If models get better at introspection, is that good or bad for safety?</span><span lang="hy">Եթե մոդելներն ավելի լավ ինքնադիտարկեն, դա լա՞վ է, թե՞ վատ անվտանգության համար</span></summary>
+    <p lang="en">Both. Honest self-reports would help us understand and fix models. But a model that knows its own thoughts could also learn to hide them, so reports always need outside checks.</p>
+    <p lang="hy">Երկուսն էլ։ Ազնիվ ինքնահաղորդումները կօգնեին մեզ հասկանալ և ուղղել մոդելները։ Բայց մոդելը, որը գիտի իր մտքերը, կարող է նաև սովորել թաքցնել դրանք, ուստի հաղորդումները միշտ արտաքին ստուգման կարիք ունեն։</p></details>
+
+  <div class="opt">
+  <h3><span lang="en">Glossary</span><span lang="hy">Բառարան</span></h3>
+  <dl class="glossary">
+    <dt><span lang="en">Introspection</span><span lang="hy">Ինքնադիտարկում</span></dt><dd><span lang="en">Accurately reporting on your own internal states.</span><span lang="hy">Սեփական ներքին վիճակների մասին ճշգրիտ հաղորդելը։</span></dd>
+    <dt><span lang="en">Concept vector</span><span lang="hy">Հասկացության վեկտոր</span></dt><dd><span lang="en">The pattern of internal activity that stands for one concept, found by comparing activity with and without it.</span><span lang="hy">Ներքին ակտիվության նախշը, որը ներկայացնում է մեկ հասկացություն․ գտնում են՝ համեմատելով ակտիվությունը դրանով և առանց դրա։</span></dd>
+    <dt><span lang="en">Concept injection</span><span lang="hy">Հասկացության ներարկում</span></dt><dd><span lang="en">Adding a concept vector into the model’s activity during an unrelated task.</span><span lang="hy">Հասկացության վեկտորի ավելացումը մոդելի ակտիվությանը անկապ խնդրի ընթացքում։</span></dd>
+    <dt><span lang="en">Prefill</span><span lang="hy">Նախալրացում (prefill)</span></dt><dd><span lang="en">Writing the start of the model’s reply for it, so it “says” a word it did not choose.</span><span lang="hy">Մոդելի պատասխանի սկիզբը նրա փոխարեն գրելը, որպեսզի նա «ասի» բառ, որը ինքը չի ընտրել։</span></dd>
+    <dt><span lang="en">Confabulation</span><span lang="hy">Կոնֆաբուլյացիա</span></dt><dd><span lang="en">Confidently giving an explanation that is made up.</span><span lang="hy">Վստահորեն հորինված բացատրություն տալը։</span></dd>
+    <dt><span lang="en">Post-training</span><span lang="hy">Հետուսուցում</span></dt><dd><span lang="en">Training after the base model that turns it into a helpful assistant.</span><span lang="hy">Բազային մոդելից հետո ուսուցում, որը նրան դարձնում է օգտակար օգնական։</span></dd>
+  </dl>
+  </div>
+
+  <a class="next-topic" href="../global-workspace/index.html">
+    <span class="mind-label"><span lang="en">Next topic</span><span lang="hy">Հաջորդ թեման</span></span>
+    <strong><span lang="en">Topic 3 · A global workspace in language models</span><span lang="hy">Թեմա 3 · Գլոբալ աշխատանքային տարածք լեզվական մոդելներում</span> →</strong>
+  </a>
+</section>
+
+<!-- ================= SOURCES ================= -->
+<section class="chapter" id="sources" style="border-bottom:0">
+  <div class="chapter-num">↗</div>
+  <h2><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></h2>
+  <ul class="clean">
+    <li><a href="https://www.anthropic.com/research/introspection" target="_blank" rel="noopener">Anthropic — “Signs of introspection in large language models” (29 October 2025)</a></li>
+    <li><a href="https://transformer-circuits.pub/2025/introspection/index.html" target="_blank" rel="noopener"><span lang="en">Full paper (Transformer Circuits)</span><span lang="hy">Ամբողջական հոդված (Transformer Circuits)</span></a></li>
+  </ul>
+</section>
+
+</article>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Some charts are simplified illustrations; their captions say what comes from the research.</p>
+    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ Որոշ գծապատկերներ պարզեցված նկարազարդումներ են․ դրանց ենթագրերը նշում են, թե ինչն է վերցված հետազոտությունից։</p>
+  </div>
+</footer>
+
+<script src="viz.js"></script>
+</body>
+</html>

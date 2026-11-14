@@ -112,7 +112,8 @@ code, .mono { font-family: var(--mono); font-size: 0.9em; }
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.brand { display: flex; align-items: center; gap: 10px; color: var(--text-primary); text-decoration: none; font-weight: 700; letter-spacing: 0.2px; }
+.brand { display: flex; min-width: 0; align-items: center; gap: 10px; color: var(--text-primary); text-decoration: none; font-weight: 700; letter-spacing: 0.2px; }
+.brand > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-logo { width: 30px; height: 30px; border-radius: 8px; display: block; }
 .topbar-right { display: flex; align-items: center; gap: 14px; }
 .progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: var(--series-1); }

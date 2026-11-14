@@ -36,6 +36,42 @@
   </section>
 
   <section class="topics">
+    <a class="topic" href="tracing-thoughts/index.html">
+      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <g stroke="rgba(57,135,229,0.55)" stroke-width="2" fill="none">
+          <path d="M40 85 C 90 85, 100 45, 150 45"/><path d="M40 85 C 90 85, 100 125, 150 125"/>
+          <path d="M210 45 C 250 45, 250 85, 290 85"/><path d="M210 125 C 250 125, 250 85, 290 85"/>
+        </g>
+        <rect style="fill:var(--surface-2);stroke:var(--line)" x="10" y="70" width="60" height="30" rx="7"/><text style="fill:var(--text-secondary)" x="40" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Dallas</text>
+        <rect x="150" y="30" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="50" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Texas</text>
+        <rect x="150" y="110" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="130" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">capital</text>
+        <rect style="fill:var(--surface-2)" x="290" y="70" width="80" height="30" rx="7" stroke="#199e70"/><text style="fill:var(--text-primary)" x="330" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Austin</text>
+      </svg>
+      <div class="body">
+        <span class="chip"><span lang="en">Topic 1 · Gor</span><span lang="hy">Թեմա 1 · Գոռ</span></span>
+        <h3><span lang="en">Tracing the thoughts of a large language model</span><span lang="hy">Մեծ լեզվական մոդելի մտքերի հետագծումը</span></h3>
+        <p lang="en">An “AI microscope” shows how Claude plans rhymes, does mental maths, reasons in steps, hallucinates and falls for jailbreaks.</p>
+        <p lang="hy">«ԱԲ մանրադիտակը» ցույց է տալիս, թե ինչպես է Claude-ը պլանավորում հանգերը, հաշվում մտքում, դատում քայլերով, հալյուցինացիաներ ունենում և խաբվում jailbreak-ներից։</p>
+      </div>
+    </a>
+
+    <a class="topic" href="introspection/index.html">
+      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <g style="fill:var(--line)"><circle cx="60" cy="40" r="3"/><circle cx="110" cy="120" r="3"/><circle cx="150" cy="55" r="3"/><circle cx="90" cy="80" r="3"/><circle cx="250" cy="35" r="3"/><circle cx="300" cy="130" r="3"/><circle cx="340" cy="60" r="3"/><circle cx="270" cy="95" r="3"/><circle cx="40" cy="140" r="3"/><circle cx="360" cy="140" r="3"/></g>
+        <circle cx="200" cy="85" r="34" fill="none" stroke="#3987e5" stroke-width="2" opacity=".5"/>
+        <circle cx="200" cy="85" r="52" fill="none" stroke="#3987e5" stroke-width="1.5" opacity=".25"/>
+        <circle cx="200" cy="85" r="9" fill="#d95926"/>
+        <path d="M262 30 L214 74" stroke="#d95926" stroke-width="2.5" stroke-linecap="round"/>
+        <text style="fill:var(--alt-text)" x="232" y="160" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600" text-anchor="middle">“I notice something…”</text>
+      </svg>
+      <div class="body">
+        <span class="chip"><span lang="en">Topic 2 · Aram</span><span lang="hy">Թեմա 2 · Արամ</span></span>
+        <h3><span lang="en">Can a language model notice its own thoughts?</span><span lang="hy">Կարո՞ղ է լեզվական մոդելը նկատել իր սեփական մտքերը</span></h3>
+        <p lang="en">Researchers plant a thought inside Claude and ask if it notices. Sometimes it does: real but unreliable introspection.</p>
+        <p lang="hy">Հետազոտողները միտք են «տնկում» Claude-ի ներսում և հարցնում՝ արդյոք նա նկատում է։ Երբեմն նկատում է․ իրական, բայց անհուսալի ինքնադիտարկում։</p>
+      </div>
+    </a>
+
     <a class="topic" href="global-workspace/index.html">
       <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs><radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(57,135,229,0.5)"/><stop offset="100%" stop-color="rgba(57,135,229,0)"/></radialGradient></defs>
@@ -49,43 +85,10 @@
         <text style="fill:var(--blue-text)" x="214" y="78" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600">J-space</text>
       </svg>
       <div class="body">
-        <span class="chip"><span lang="en">Topic 1 · Gor</span><span lang="hy">Թեմա 1 · Գոռ</span></span>
-        <h3><span lang="en">A global workspace in language models</span><span lang="hy">Գլոբալ աշխատանքային տարածք լեզվական մոդելներում</span></h3>
-        <p lang="en">Claude has a tiny “stage” of thoughts. How it was found, and how we know Claude can report it, control it and reason with it.</p>
-        <p lang="hy">Claude-ն ունի մտքերի փոքրիկ «բեմ»։ Ինչպես այն գտան, և ինչպես գիտենք, որ Claude-ը կարող է հաղորդել այն, կառավարել և դատել դրանով։</p>
-      </div>
-    </a>
-
-    <a class="topic" href="workspace-uses/index.html">
-      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <g style="fill:var(--line)"><circle cx="56" cy="30" r="4"/><circle cx="72" cy="30" r="4"/><circle cx="88" cy="30" r="4"/><circle cx="104" cy="30" r="4"/><circle cx="120" cy="30" r="4"/><circle cx="136" cy="30" r="4"/><circle cx="152" cy="30" r="4"/><circle cx="168" cy="30" r="4"/><circle cx="184" cy="30" r="4"/><circle cx="200" cy="30" r="4"/><circle cx="232" cy="30" r="4"/><circle cx="248" cy="30" r="4"/><circle cx="264" cy="30" r="4"/><circle cx="280" cy="30" r="4"/><circle cx="296" cy="30" r="4"/><circle cx="312" cy="30" r="4"/><circle cx="328" cy="30" r="4"/><circle cx="40" cy="52" r="4"/><circle cx="56" cy="52" r="4"/><circle cx="72" cy="52" r="4"/><circle cx="88" cy="52" r="4"/><circle cx="104" cy="52" r="4"/><circle cx="120" cy="52" r="4"/><circle cx="136" cy="52" r="4"/><circle cx="152" cy="52" r="4"/><circle cx="168" cy="52" r="4"/><circle cx="184" cy="52" r="4"/><circle cx="200" cy="52" r="4"/><circle cx="216" cy="52" r="4"/><circle cx="232" cy="52" r="4"/><circle cx="248" cy="52" r="4"/><circle cx="264" cy="52" r="4"/><circle cx="280" cy="52" r="4"/><circle cx="296" cy="52" r="4"/><circle cx="312" cy="52" r="4"/><circle cx="344" cy="52" r="4"/><circle cx="40" cy="74" r="4"/><circle cx="56" cy="74" r="4"/><circle cx="72" cy="74" r="4"/><circle cx="88" cy="74" r="4"/><circle cx="104" cy="74" r="4"/><circle cx="120" cy="74" r="4"/><circle cx="152" cy="74" r="4"/><circle cx="168" cy="74" r="4"/><circle cx="184" cy="74" r="4"/><circle cx="200" cy="74" r="4"/><circle cx="216" cy="74" r="4"/><circle cx="232" cy="74" r="4"/><circle cx="248" cy="74" r="4"/><circle cx="264" cy="74" r="4"/><circle cx="280" cy="74" r="4"/><circle cx="296" cy="74" r="4"/><circle cx="312" cy="74" r="4"/><circle cx="328" cy="74" r="4"/><circle cx="344" cy="74" r="4"/><circle cx="40" cy="96" r="4"/><circle cx="56" cy="96" r="4"/><circle cx="72" cy="96" r="4"/><circle cx="88" cy="96" r="4"/><circle cx="104" cy="96" r="4"/><circle cx="136" cy="96" r="4"/><circle cx="152" cy="96" r="4"/><circle cx="168" cy="96" r="4"/><circle cx="184" cy="96" r="4"/><circle cx="200" cy="96" r="4"/><circle cx="216" cy="96" r="4"/><circle cx="232" cy="96" r="4"/><circle cx="264" cy="96" r="4"/><circle cx="280" cy="96" r="4"/><circle cx="296" cy="96" r="4"/><circle cx="312" cy="96" r="4"/><circle cx="328" cy="96" r="4"/><circle cx="344" cy="96" r="4"/><circle cx="40" cy="118" r="4"/><circle cx="56" cy="118" r="4"/><circle cx="72" cy="118" r="4"/><circle cx="88" cy="118" r="4"/><circle cx="104" cy="118" r="4"/><circle cx="120" cy="118" r="4"/><circle cx="136" cy="118" r="4"/><circle cx="152" cy="118" r="4"/><circle cx="168" cy="118" r="4"/><circle cx="184" cy="118" r="4"/><circle cx="200" cy="118" r="4"/><circle cx="216" cy="118" r="4"/><circle cx="248" cy="118" r="4"/><circle cx="264" cy="118" r="4"/><circle cx="280" cy="118" r="4"/><circle cx="296" cy="118" r="4"/><circle cx="312" cy="118" r="4"/><circle cx="328" cy="118" r="4"/><circle cx="344" cy="118" r="4"/></g>
-        <g fill="#3987e5"><circle cx="40" cy="30" r="4"/><circle cx="216" cy="30" r="4"/><circle cx="344" cy="30" r="4"/><circle cx="328" cy="52" r="4"/><circle cx="136" cy="74" r="4"/><circle cx="120" cy="96" r="4"/><circle cx="248" cy="96" r="4"/><circle cx="232" cy="118" r="4"/></g>
-        <text style="fill:var(--amber)" x="40" y="160" font-family="JetBrains Mono, monospace" font-size="13" font-weight="600">safety · ablation · consciousness</text>
-      </svg>
-      <div class="body">
-        <span class="chip"><span lang="en">Topic 2 · Aram</span><span lang="hy">Թեմա 2 · Արամ</span></span>
-        <h3><span lang="en">What the workspace is for</span><span lang="hy">Ինչի համար է աշխատանքային տարածքը</span></h3>
-        <p lang="en">What breaks when the workspace is removed, how reading it catches a model that is hiding something, and what it says about consciousness.</p>
-        <p lang="hy">Ինչն է կոտրվում, երբ աշխատանքային տարածքը հեռացվում է, ինչպես է այն կարդալը բռնում ինչ-որ բան թաքցնող մոդելին, և ինչ է դա ասում գիտակցության մասին։</p>
-      </div>
-    </a>
-
-    <a class="topic" href="tracing-thoughts/index.html">
-      <svg class="art" viewBox="0 0 400 170" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <g stroke="rgba(57,135,229,0.55)" stroke-width="2" fill="none">
-          <path d="M40 85 C 90 85, 100 45, 150 45"/><path d="M40 85 C 90 85, 100 125, 150 125"/>
-          <path d="M210 45 C 250 45, 250 85, 290 85"/><path d="M210 125 C 250 125, 250 85, 290 85"/>
-        </g>
-        <rect style="fill:var(--surface-2);stroke:var(--line)" x="10" y="70" width="60" height="30" rx="7"/><text style="fill:var(--text-secondary)" x="40" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Dallas</text>
-        <rect x="150" y="30" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="50" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Texas</text>
-        <rect x="150" y="110" width="70" height="30" rx="7" fill="rgba(57,135,229,0.18)" stroke="#3987e5"/><text style="fill:var(--blue-text)" x="185" y="130" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">capital</text>
-        <rect style="fill:var(--surface-2)" x="290" y="70" width="80" height="30" rx="7" stroke="#199e70"/><text style="fill:var(--text-primary)" x="330" y="90" font-size="12" text-anchor="middle" font-family="JetBrains Mono, monospace">Austin</text>
-      </svg>
-      <div class="body">
         <span class="chip"><span lang="en">Topic 3 · Artur</span><span lang="hy">Թեմա 3 · Արթուր</span></span>
-        <h3><span lang="en">Tracing the thoughts of a large language model</span><span lang="hy">Մեծ լեզվական մոդելի մտքերի հետագծումը</span></h3>
-        <p lang="en">An “AI microscope” shows how Claude plans rhymes, does mental maths, reasons in steps, hallucinates and falls for jailbreaks.</p>
-        <p lang="hy">«ԱԲ մանրադիտակը» ցույց է տալիս, թե ինչպես է Claude-ը պլանավորում հանգերը, հաշվում մտքում, դատում քայլերով, հալյուցինացիաներ ունենում և խաբվում jailbreak-ներից։</p>
+        <h3><span lang="en">A global workspace in language models</span><span lang="hy">Գլոբալ աշխատանքային տարածք լեզվական մոդելներում</span></h3>
+        <p lang="en">Claude has a tiny “stage” of thoughts. How it was found, how Claude reports, controls and reasons with it, what breaks without it, and how reading it catches a model that is hiding something.</p>
+        <p lang="hy">Claude-ն ունի մտքերի փոքրիկ «բեմ»։ Ինչպես այն գտան, ինչպես է Claude-ը հաղորդում, կառավարում և դատում դրանով, ինչն է կոտրվում առանց դրա, և ինչպես է այն կարդալը բռնում ինչ-որ բան թաքցնող մոդելին։</p>
       </div>
     </a>
   </section>

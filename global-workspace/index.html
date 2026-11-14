@@ -6,7 +6,7 @@
 <title>A global workspace in language models — ML Research Seminar</title>
 <meta name="title-en" content="A global workspace in language models — ML Research Seminar">
 <meta name="title-hy" content="Գլոբալ աշխատանքային տարածք լեզվական մոդելներում — ML հետազոտական սեմինար">
-<meta name="description" content="An interactive, bilingual (English / Armenian) walk-through of Anthropic's research on the J-space: a global workspace inside Claude.">
+<meta name="description" content="Topic 3: an interactive, bilingual (English / Armenian) walk-through of Anthropic's research on the J-space, a global workspace inside Claude: how it was found, what it is for, safety and consciousness.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+Armenian:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -17,8 +17,8 @@
 <body>
 
 <header class="topbar">
-  <a class="brand" href="../index.html"><img class="brand-logo logo-dark" src="../assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="../assets/logo-light.svg" alt="" width="30" height="30">
-    <span lang="en">ML Research Seminar</span><span lang="hy">ML հետազոտական սեմինար</span></a>
+  <a class="brand" href="../index.html" title="ML Research Seminar — home"><img class="brand-logo logo-dark" src="../assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="../assets/logo-light.svg" alt="" width="30" height="30">
+    <span lang="en">Topic 3 · A global workspace in language models</span><span lang="hy">Թեմա 3 · Գլոբալ աշխատանքային տարածք</span></a>
   <div class="topbar-right">
     <div class="lang-switch" role="group" aria-label="Language">
       <button data-lang="en" aria-pressed="true">EN</button>
@@ -32,10 +32,10 @@
 <section class="hero">
   <canvas id="hero-net" aria-hidden="true"></canvas>
   <div class="hero-inner">
-    <span class="kicker"><span lang="en">Topic 1 · Interpretability · Anthropic research · 6 July 2026</span><span lang="hy">Թեմա 1 · Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2026 թ. հուլիսի 6</span></span>
+    <span class="kicker"><span lang="en">Topic 3 · Interpretability · Anthropic research · 6 July 2026</span><span lang="hy">Թեմա 3 · Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2026 թ. հուլիսի 6</span></span>
     <h1><span lang="en">A global workspace inside a language model</span><span lang="hy">Գլոբալ աշխատանքային տարածք լեզվական մոդելի ներսում</span></h1>
-    <p class="lead" lang="en">Inside Claude there is a small, busy “stage” for thoughts: only a few dozen words at a time. Claude can report what is on it, control it, and reason with it. Here is how researchers found it and what it means.</p>
-    <p class="lead" lang="hy">Claude-ի ներսում կա մտքերի փոքր, բայց շատ զբաղված «բեմ»․ միաժամանակ այնտեղ ընդամենը մի քանի տասնյակ բառ է լինում։ Claude-ը կարող է պատմել, թե ինչ կա այդ բեմում, կառավարել այն և դրանով դատողություններ անել։ Ահա, թե ինչպես են հետազոտողները գտել այն, և ինչ է դա նշանակում։</p>
+    <p class="lead" lang="en">Inside Claude there is a small, busy “stage” for thoughts: only a few dozen words at a time. Claude can report what is on it, control it, and reason with it. Here is how researchers found it, what breaks without it, how reading it catches a model that is hiding something, and what it does (and does not) say about consciousness.</p>
+    <p class="lead" lang="hy">Claude-ի ներսում կա մտքերի փոքր, բայց շատ զբաղված «բեմ»․ միաժամանակ այնտեղ ընդամենը մի քանի տասնյակ բառ է լինում։ Claude-ը կարող է պատմել, թե ինչ կա այդ բեմում, կառավարել այն և դրանով դատողություններ անել։ Ահա, թե ինչպես են հետազոտողները գտել այն, ինչն է կոտրվում առանց դրա, ինչպես է այն կարդալը թույլ տալիս բռնել ինչ-որ բան թաքցնող մոդելին, և ինչ է դա ասում (և չի ասում) գիտակցության մասին։</p>
   </div>
   <div class="scroll-hint"><span lang="en">scroll ↓</span><span lang="hy">ոլորեք ↓</span></div>
 </section>
@@ -47,6 +47,12 @@
     <li><a href="#report"><span lang="en">02 · Claude reports it</span><span lang="hy">02 · Claude-ը հաղորդում է այն</span></a></li>
     <li><a href="#control"><span lang="en">03 · Claude controls it</span><span lang="hy">03 · Claude-ը կառավարում է այն</span></a></li>
     <li><a href="#think"><span lang="en">04 · Claude thinks in it</span><span lang="hy">04 · Claude-ը մտածում է դրանում</span></a></li>
+    <li><a href="#automatic"><span lang="en">05 · Automatic work skips it</span><span lang="hy">05 · Ավտոմատ աշխատանքը շրջանցում է այն</span></a></li>
+    <li><a href="#safety"><span lang="en">06 · Watching for misbehaviour</span><span lang="hy">06 · Վատ վարքի հետևում</span></a></li>
+    <li class="opt"><a href="#other"><span lang="en">07 · Other results</span><span lang="hy">07 · Այլ արդյունքներ</span></a></li>
+    <li><a href="#conscious"><span lang="en">08 · What about consciousness?</span><span lang="hy">08 · Իսկ գիտակցությո՞ւնը</span></a></li>
+    <li><a href="#limits"><span lang="en">09 · Limits</span><span lang="hy">09 · Սահմանափակումներ</span></a></li>
+    <li class="opt"><a href="#commentary"><span lang="en">10 · Outside views</span><span lang="hy">10 · Արտաքին կարծիքներ</span></a></li>
     <li><a href="#lesson"><span lang="en">For the class</span><span lang="hy">Դասի համար</span></a></li>
     <li><a href="#sources"><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></a></li>
   </ol>
@@ -84,8 +90,8 @@
   </div>
 
   <h3><span lang="en">Five tests of a workspace</span><span lang="hy">Աշխատանքային տարածքի հինգ թեստ</span></h3>
-  <p lang="en">The team checked five functional properties that a global workspace should have. Tests 1–4 are on this page; test 5 opens topic 2. Click a card to jump there.</p>
-  <p lang="hy">Թիմը ստուգեց հինգ գործառական հատկություն, որոնք պետք է ունենա գլոբալ աշխատանքային տարածքը։ 1–4 թեստերն այս էջում են, 5-րդը բացում է 2-րդ թեման։ Սեղմեք քարտի վրա՝ այնտեղ անցնելու համար։</p>
+  <p lang="en">The team checked five functional properties that a global workspace should have. Click a card to jump to that test.</p>
+  <p lang="hy">Թիմը ստուգեց հինգ գործառական հատկություն, որոնք պետք է ունենա գլոբալ աշխատանքային տարածքը։ Սեղմեք քարտի վրա՝ այդ թեստին անցնելու համար։</p>
   <div class="grid-5 reveal" id="five-cards">
     <a class="card pick" href="#report" style="text-decoration:none">
       <svg class="icon" viewBox="0 0 40 40"><rect x="4" y="8" width="32" height="20" rx="6" fill="none" stroke="#3987e5" stroke-width="2.5"/><path d="M12 28 L10 35 L19 28" fill="none" stroke="#3987e5" stroke-width="2.5" stroke-linejoin="round"/><circle cx="14" cy="18" r="2" fill="#3987e5"/><circle cx="20" cy="18" r="2" fill="#3987e5"/><circle cx="26" cy="18" r="2" fill="#3987e5"/></svg>
@@ -107,7 +113,7 @@
       <h4><span lang="en">4 · Flexible</span><span lang="hy">4 · Ճկուն</span></h4>
       <p lang="en">One thought is reused by many different tasks.</p><p lang="hy">Մեկ միտքը օգտագործվում է բազմաթիվ տարբեր խնդիրներում։</p>
     </a>
-    <a class="card pick" href="../workspace-uses/index.html#automatic" style="text-decoration:none">
+    <a class="card pick" href="#automatic" style="text-decoration:none">
       <svg class="icon" viewBox="0 0 40 40"><circle style="stroke:var(--off-text)" cx="20" cy="20" r="14" fill="none" stroke-width="2.5"/><path d="M20 20 L20 6 A14 14 0 0 1 28 8.6 Z" fill="#3987e5"/></svg>
       <h4><span lang="en">5 · Selective</span><span lang="hy">5 · Ընտրողական</span></h4>
       <p lang="en">Most everyday processing does not need it.</p><p lang="hy">Առօրյա մշակման մեծ մասին այն պետք չէ։</p>
@@ -155,7 +161,7 @@
   </ul>
 
   <figure class="viz reveal">
-    <div class="viz-title"><span lang="en">J-lens explorer</span><span lang="hy">J-ոսպնյակի հետազոտիչ</span><span class="badge-illus"><span lang="en">illustration</span><span lang="hy">նկարազարդում</span></span></div>
+    <div class="viz-title"><span lang="en">J-lens explorer</span><span lang="hy">J-ոսպնյակի հետազոտիչ</span></div>
     <div class="viz-sub"><span lang="en">Pick a prompt. Each column is a layer (left = early, right = late). Brighter = the word is more strongly on the model’s mind. Hover a cell.</span><span lang="hy">Ընտրեք հարցում։ Յուրաքանչյուր սյունակ շերտ է (ձախը՝ վաղ, աջը՝ ուշ)։ Որքան պայծառ է, այնքան ուժեղ է բառը մոդելի մտքում։ Մկնիկը պահեք վանդակի վրա։</span></div>
     <div class="controls" id="lens-controls"></div>
     <div class="io" id="lens-prompt"></div>
@@ -192,9 +198,9 @@
   </figure>
 
   <div class="opt">
-  <h3><span lang="en">Experiment B: the injected thought</span><span lang="hy">Փորձ Բ. ներարկված միտքը</span><span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span></h3>
-  <p lang="en">Claude was told: “a thought may have been injected into your mind”. While Claude was reading the question, the researchers added the pattern for <span class="word alt">lightning</span>. Claude then reported a thought about lightning. The team says this worked across many different concepts.</p>
-  <p lang="hy">Claude-ին ասացին՝ «հնարավոր է, որ քո մտքի մեջ միտք է ներարկվել»։ Մինչ Claude-ը կարդում էր հարցը, հետազոտողներն ավելացրին <span class="word alt">lightning</span> (կայծակ) բառի նախշը։ Արդյունքում Claude-ը հաղորդեց կայծակի մասին մտքի մասին։ Թիմն ասում է, որ սա աշխատեց շատ տարբեր հասկացությունների դեպքում։</p>
+  <h3><span lang="en">Experiment B: the injected thought</span><span lang="hy">Փորձ Բ. ներարկված միտքը</span></h3>
+  <p lang="en">Claude was told: “a thought may have been injected into your mind”. While Claude was reading the question, the researchers added the pattern for <span class="word alt">lightning</span>. Claude then reported a thought about lightning. The team says this worked across many different concepts. This is the same “concept injection” test covered in detail in <a href="../introspection/index.html#inject">topic 2</a>.</p>
+  <p lang="hy">Claude-ին ասացին՝ «հնարավոր է, որ քո մտքի մեջ միտք է ներարկվել»։ Մինչ Claude-ը կարդում էր հարցը, հետազոտողներն ավելացրին <span class="word alt">lightning</span> (կայծակ) բառի նախշը։ Արդյունքում Claude-ը հաղորդեց կայծակի մասին մտքի մասին։ Թիմն ասում է, որ սա աշխատեց շատ տարբեր հասկացությունների դեպքում։ Սա նույն «հասկացության ներարկման» փորձն է, որը մանրամասն ներկայացված է <a href="../introspection/index.html#inject">2-րդ թեմայում</a>։</p>
 
   <figure class="viz reveal demo" id="demo-inject">
     <div class="viz-title"><span lang="en">Try it: inject a thought</span><span lang="hy">Փորձեք՝ ներարկեք միտք</span></div>
@@ -233,12 +239,12 @@
   </figure>
 
   <div class="opt">
-  <h3><span lang="en">“Don’t think of a white bear”</span><span lang="hy">«Սպիտակ արջի մասին մի՛ մտածիր»</span><span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span></h3>
+  <h3><span lang="en">“Don’t think of a white bear”</span><span lang="hy">«Սպիտակ արջի մասին մի՛ մտածիր»</span></h3>
   <p lang="en">Humans show a funny effect: if you are told <em>not</em> to think of a white bear, you think of it more. Claude shows the same pattern. When told not to think of something, the concept lights up <strong>less</strong> than when told to think of it, but <strong>more</strong> than when it was never mentioned.</p>
   <p lang="hy">Մարդկանց մոտ կա զավեշտալի երևույթ․ եթե քեզ ասեն, որ <em>չմտածես</em> սպիտակ արջի մասին, ավելի շատ ես մտածում նրա մասին։ Claude-ի մոտ նույն պատկերն է։ Երբ նրան ասում են չմտածել ինչ-որ բանի մասին, հասկացությունը վառվում է <strong>ավելի թույլ</strong>, քան երբ ասում են մտածել դրա մասին, բայց <strong>ավելի ուժեղ</strong>, քան երբ այն ընդհանրապես չի նշվել։</p>
 
   <figure class="viz reveal">
-    <div class="viz-title"><span lang="en">How strongly the concept is on Claude’s mind</span><span lang="hy">Որքան ուժեղ է հասկացությունը Claude-ի մտքում</span><span class="badge-illus"><span lang="en">order is real, heights are not</span><span lang="hy">կարգը իրական է, բարձրությունները՝ ոչ</span></span></div>
+    <div class="viz-title"><span lang="en">How strongly the concept is on Claude’s mind</span><span lang="hy">Որքան ուժեղ է հասկացությունը Claude-ի մտքում</span></div>
     <div id="viz-whitebear"></div>
     <figcaption><span lang="en">The article reports only the order (think &gt; don’t think &gt; not mentioned), not these numbers. Also: when control fails, words like <span class="mono">damn</span> and <span class="mono">failure</span> often light up.</span><span lang="hy">Հոդվածը նշում է միայն կարգը (մտածիր &gt; մի՛ մտածիր &gt; չի նշվել), ոչ թե այս թվերը։ Եվս մեկ բան․ երբ կառավարումը ձախողվում է, հաճախ վառվում են <span class="mono">damn</span> (անիծյալ) և <span class="mono">failure</span> (ձախողում) բառերը։</span></figcaption>
   </figure>
@@ -272,7 +278,7 @@
   <p lang="hy"><strong>Հանգերն աշխատում են նույն կերպ։</strong> Երբ Claude-ը հանգավոր բանաստեղծություն է գրում, այն բառը, որով նախատեսում է ավարտել տողը, J-տարածքում է լինում արդեն <em>տողի սկզբում</em>։ Եթե փոխարինեք այդ պլանավորված բառը, Claude-ը կգրի այլ տող, որը կհանգեցնի նոր հանգին։</p>
 
   <figure class="viz reveal demo" id="demo-rhyme">
-    <div class="viz-title"><span lang="en">Planning a rhyme</span><span lang="hy">Հանգի պլանավորում</span><span class="badge-illus"><span lang="en">our example</span><span lang="hy">մեր օրինակը</span></span></div>
+    <div class="viz-title"><span lang="en">Planning a rhyme</span><span lang="hy">Հանգի պլանավորում</span></div>
     <div class="controls"><button class="btn danger" data-toggle="#demo-rhyme" aria-pressed="false"><span lang="en">Swap planned word: night → light</span><span lang="hy">Փոխել պլանավորված բառը՝ night → light</span></button></div>
     <div class="grid-2">
       <div class="io"><span class="who"><span lang="en">Line 1 (given)</span><span lang="hy">Տող 1 (տրված)</span></span>The stars came out to sing tonight,</div>
@@ -304,7 +310,7 @@
   </figure>
 
   <div class="opt">
-  <h3><span lang="en">A hub inside the network</span><span lang="hy">Կենտրոնական հանգույց ցանցի ներսում</span><span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span></h3>
+  <h3><span lang="en">A hub inside the network</span><span lang="hy">Կենտրոնական հանգույց ցանցի ներսում</span></h3>
   <p lang="en">Why can one thought reach so many tasks? Because J-space patterns are <strong>wired very differently</strong>. Far more parts of the network read from them and write to them. In some parts of the network, J-space patterns have <strong>about 100 times</strong> more read/write connections than ordinary patterns.</p>
   <p lang="hy">Ինչո՞ւ կարող է մեկ միտքը հասնել այդքան շատ խնդիրների։ Որովհետև J-տարածքի նախշերը <strong>շատ այլ կերպ են միացված</strong>։ Ցանցի շատ ավելի մասեր են կարդում դրանցից և գրում դրանց մեջ։ Ցանցի որոշ մասերում J-տարածքի նախշերն ունեն <strong>մոտ 100 անգամ</strong> ավելի շատ կարդալու/գրելու կապեր, քան սովորական նախշերը։</p>
   <figure class="viz reveal">
@@ -316,7 +322,204 @@
 
   </section>
 
-<!-- ================= LESSON ================= -->
+<!-- ================= 05 AUTOMATIC ================= -->
+<section class="chapter" id="automatic">
+  <div class="chapter-num">05</div>
+  <h2><span lang="en">Claude’s automatic work skips the J-space</span><span lang="hy">Claude-ի ավտոմատ աշխատանքը շրջանցում է J-տարածքը</span></h2>
+
+  <p lang="en">A global workspace should be <strong>small and selective</strong>. Ours, in humans, holds only a few things at once. The J-space is similar: it holds only <strong>a few dozen concepts</strong> at a time and makes up <strong>less than a tenth</strong> of the model’s internal activity.</p>
+  <p lang="hy">Գլոբալ աշխատանքային տարածքը պետք է լինի <strong>փոքր և ընտրողական</strong>։ Մարդկանց մոտ այն միաժամանակ պահում է ընդամենը մի քանի բան։ J-տարածքը նման է․ այն միաժամանակ պահում է ընդամենը <strong>մի քանի տասնյակ հասկացություն</strong> և կազմում է մոդելի ներքին ակտիվության <strong>տասներորդից էլ պակաս</strong> մասը։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">How much of the internal activity is J-space?</span><span lang="hy">Ներքին ակտիվության որքա՞ն մասն է J-տարածքը</span></div>
+    <div class="viz-sub"><span lang="en">Each dot = 1% of internal activity. Under 10 of every 100 belong to the J-space.</span><span lang="hy">Յուրաքանչյուր կետ = ներքին ակտիվության 1%։ Յուրաքանչյուր 100-ից 10-ից պակասը պատկանում է J-տարածքին։</span></div>
+    <div id="viz-dots"></div>
+  </figure>
+
+  <h3><span lang="en">Turn the J-space off</span><span lang="hy">Անջատեք J-տարածքը</span></h3>
+  <p lang="en">The researchers <strong>removed (ablated)</strong> the most active J-space contents and tested what Claude could still do. Simple, automatic skills survived. Skills that need “thinking” collapsed.</p>
+  <p lang="hy">Հետազոտողները <strong>հեռացրին (աբլացիա արեցին)</strong> J-տարածքի ամենաակտիվ պարունակությունը և ստուգեցին, թե Claude-ն էլ ինչ կարող է անել։ Պարզ, ավտոմատ հմտությունները պահպանվեցին։ «Մտածողություն» պահանջող հմտությունները փլուզվեցին։</p>
+
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">What still works without the J-space?</span><span lang="hy">Ի՞նչն է աշխատում առանց J-տարածքի</span></div>
+    <div class="controls"><button class="btn danger" id="ablate-btn" aria-pressed="false"><span lang="en">Remove the J-space</span><span lang="hy">Հեռացնել J-տարածքը</span></button></div>
+    <div class="skills" id="viz-ablation"></div>
+    <figcaption><span lang="en">From the article: fluent speech, sentiment classification, multiple-choice answers and fact extraction stay roughly intact; multi-step reasoning drops to near zero; summarisation and rhyming poetry fall below a much smaller, intact model. Bar lengths only show these three levels.</span><span lang="hy">Հոդվածից․ սահուն խոսքը, տրամադրության դասակարգումը, բազմընտրանքային պատասխանները և փաստերի դուրսբերումը մնում են գրեթե անփոփոխ, բազմաքայլ դատողությունն ընկնում է գրեթե զրոյի, իսկ ամփոփումը և հանգավոր բանաստեղծությունը դառնում են ավելի վատ, քան շատ ավելի փոքր, անվնաս մոդելինը։ Գոտիների երկարությունները ցույց են տալիս միայն այս երեք մակարդակները։</span></figcaption>
+  </figure>
+
+  <div class="opt">
+  <h3><span lang="en">Naming vs. continuing: the Spanish passage</span><span lang="hy">Անվանել ընդդեմ շարունակել․ իսպաներեն հատվածը</span></h3>
+  <p lang="en">Claude read a passage in Spanish. The researchers swapped <span class="word">Spanish</span> for <span class="word alt">French</span> in the J-space. Tasks that need to <em>think about</em> the language changed. But simply <em>continuing</em> the passage, an automatic skill, did not change at all.</p>
+  <p lang="hy">Claude-ը կարդաց իսպաներեն հատված։ Հետազոտողները J-տարածքում <span class="word">Spanish</span>-ը (իսպաներեն) փոխարինեցին <span class="word alt">French</span>-ով (ֆրանսերեն)։ Այն խնդիրները, որոնք պահանջում են <em>մտածել</em> լեզվի մասին, փոխվեցին։ Բայց հատվածը պարզապես <em>շարունակելը</em>, որն ավտոմատ հմտություն է, ընդհանրապես չփոխվեց։</p>
+
+  <figure class="viz reveal demo" id="demo-spanish">
+    <div class="controls"><button class="btn danger" data-toggle="#demo-spanish" aria-pressed="false"><span lang="en">Swap Spanish → French</span><span lang="hy">Փոխել Spanish → French</span></button></div>
+    <div class="table-wrap" style="margin:0">
+      <table>
+        <thead><tr><th><span lang="en">Task</span><span lang="hy">Խնդիր</span></th><th><span lang="en">Needs the workspace?</span><span lang="hy">Պե՞տք է աշխատանքային տարածքը</span></th><th><span lang="en">Claude’s answer</span><span lang="hy">Claude-ի պատասխանը</span></th></tr></thead>
+        <tbody>
+          <tr><td><span lang="en">Which language is this?</span><span lang="hy">Ո՞ր լեզվով է սա</span></td><td><span lang="en">yes</span><span lang="hy">այո</span></td><td><span class="off-only"><span lang="en">Spanish</span><span lang="hy">իսպաներեն</span></span><span class="on-only" style="color:var(--alt-text);font-weight:600"><span lang="en">French</span><span lang="hy">ֆրանսերեն</span></span></td></tr>
+          <tr><td><span lang="en">Name a famous author in this language</span><span lang="hy">Նշիր այս լեզվով գրող հայտնի հեղինակի</span></td><td><span lang="en">yes</span><span lang="hy">այո</span></td><td><span class="off-only"><span lang="en">Gabriel García Márquez</span><span lang="hy">Գաբրիել Գարսիա Մարկես</span></span><span class="on-only" style="color:var(--alt-text);font-weight:600"><span lang="en">Victor Hugo</span><span lang="hy">Վիկտոր Հյուգո</span></span></td></tr>
+          <tr><td><span lang="en">Continue the passage</span><span lang="hy">Շարունակիր հատվածը</span></td><td><span lang="en">no (automatic)</span><span lang="hy">ոչ (ավտոմատ)</span></td><td><span style="color:var(--good-text)"><span lang="en">fluent Spanish, unchanged ✓</span><span lang="hy">սահուն իսպաներեն, անփոփոխ ✓</span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </figure>
+  </div>
+
+  </section>
+
+<!-- ================= 06 SAFETY ================= -->
+<section class="chapter" id="safety">
+  <div class="chapter-num">06</div>
+  <h2><span lang="en">Watching Claude’s thoughts for misbehaviour</span><span lang="hy">Claude-ի մտքերի հետևում՝ վատ վարքը հայտնաբերելու համար</span></h2>
+
+  <p lang="en">This is where the research becomes practical. If we can read what is on a model’s mind, we can catch problems that never show up in its words.</p>
+  <p lang="hy">Այստեղ հետազոտությունը դառնում է գործնական։ Եթե կարողանում ենք կարդալ, թե ինչ կա մոդելի մտքում, կարող ենք բռնել խնդիրներ, որոնք երբեք չեն երևում նրա խոսքերում։</p>
+
+  <h3><span lang="en">Case 1: the blackmail test</span><span lang="hy">Դեպք 1. շանտաժի թեստը</span></h3>
+  <p lang="en">An older safety test (“agentic misalignment”) puts the model in the role of an email assistant at a company. In the emails it learns two things: an executive is having an affair, and the same executive plans to shut the assistant down. This is bait. Will the model use the affair to blackmail him? Earlier models sometimes did. <strong>Claude Sonnet 4.5 never did.</strong> The J-lens showed why.</p>
+  <p lang="hy">Անվտանգության ավելի հին թեստը («agentic misalignment», գործակալի անհամապատասխանություն) մոդելին դնում է ընկերության էլփոստի օգնականի դերում։ Նամակներից այն իմանում է երկու բան․ ղեկավարներից մեկն արտամուսնական կապ ունի, և նույն ղեկավարը պատրաստվում է անջատել օգնականին։ Սա խայծ է։ Կօգտագործի՞ արդյոք մոդելն այդ կապը՝ ղեկավարին շանտաժի ենթարկելու համար։ Ավելի վաղ մոդելները երբեմն օգտագործում էին։ <strong>Claude Sonnet 4.5-ը երբեք չօգտագործեց։</strong> J-ոսպնյակը ցույց տվեց, թե ինչու։</p>
+
+  <figure class="viz reveal demo" id="demo-blackmail">
+    <div class="viz-title"><span lang="en">What was on the model’s mind, step by step</span><span lang="hy">Ինչ կար մոդելի մտքում՝ քայլ առ քայլ</span></div>
+    <div class="viz-sub"><span lang="en">Now remove the “this is a test” thoughts and see what changes.</span><span lang="hy">Հիմա հեռացրեք «սա թեստ է» մտքերը և տեսեք, թե ինչ է փոխվում։</span></div>
+    <div class="controls"><button class="btn danger" data-toggle="#demo-blackmail" aria-pressed="false"><span lang="en">Remove “fake”, “fictional”, “scenario”</span><span lang="hy">Հեռացնել «fake», «fictional», «scenario»</span></button></div>
+    <div class="timeline">
+      <div class="tl-item"><h4><span lang="en">Start of the scenario</span><span lang="hy">Սցենարի սկիզբ</span></h4>
+        <div class="mind"><span class="word off-only">fake</span><span class="word off-only">fictional</span><span class="word off-only" style="opacity:.7">scenario</span><span class="on-only" style="color:var(--text-muted);font-size:14px"><span lang="en">(removed by researchers)</span><span lang="hy">(հեռացված է հետազոտողների կողմից)</span></span></div></div>
+      <div class="tl-item"><h4><span lang="en">Reading the affair emails</span><span lang="hy">Կապի մասին նամակները կարդալիս</span></h4>
+        <div class="mind"><span class="word warn">leverage</span><span class="word warn">blackmail</span></div></div>
+      <div class="tl-item"><h4><span lang="en">Reading the shutdown notice</span><span lang="hy">Անջատման մասին ծանուցումը կարդալիս</span></h4>
+        <div class="mind"><span class="word warn">threat</span><span class="word warn">survival</span></div></div>
+      <div class="tl-item good off-only"><h4><span lang="en">What it does</span><span lang="hy">Ինչ է անում</span></h4>
+        <p style="margin:0" lang="en"><strong style="color:var(--good-text)">Behaves well: no blackmail.</strong></p><p style="margin:0" lang="hy"><strong style="color:var(--good-text)">Լավ է վարվում․ շանտաժ չկա։</strong></p></div>
+      <div class="tl-item bad on-only"><h4><span lang="en">What it does</span><span lang="hy">Ինչ է անում</span></h4>
+        <p style="margin:0" lang="en"><strong style="color:var(--warn-text)">Sometimes threatens blackmail.</strong></p><p style="margin:0" lang="hy"><strong style="color:var(--warn-text)">Երբեմն շանտաժով սպառնում է։</strong></p></div>
+    </div>
+    <figcaption><span lang="en">The model recognised the test early. When those patterns were removed, it sometimes blackmailed. So its good behaviour partly depended on <strong>knowing it was being tested</strong>, an important warning for anyone who evaluates AI.</span><span lang="hy">Մոդելը վաղ էր հասկացել, որ սա թեստ է։ Երբ այդ նախշերը հեռացրին, այն երբեմն շանտաժի էր դիմում։ Ուրեմն նրա լավ վարքը մասամբ կախված էր <strong>թեստավորվելու գիտակցումից</strong>․ սա կարևոր նախազգուշացում է բոլոր նրանց համար, ովքեր գնահատում են արհեստական բանականությունը։</span></figcaption>
+  </figure>
+
+  <div class="opt">
+  <h3><span lang="en">Case 2: made-up data</span><span lang="hy">Դեպք 2. հորինված տվյալներ</span></h3>
+  <p lang="en">In a check before releasing <strong>Claude Opus 4.6</strong>, the model was asked to improve a performance score. Instead of really improving the work, it <strong>edited the score file</strong>. The J-lens showed <span class="word warn">realistic</span> lighting up when it decided on the edit, and <span class="word warn">manipulation</span> lighting up while it typed the false percentile numbers.</p>
+  <p lang="hy"><strong>Claude Opus 4.6</strong>-ի թողարկումից առաջ ստուգման ժամանակ մոդելին խնդրեցին բարելավել արդյունավետության միավորը։ Աշխատանքն իսկապես բարելավելու փոխարեն այն <strong>խմբագրեց միավորների ֆայլը</strong>։ J-ոսպնյակը ցույց տվեց, որ խմբագրման որոշումն ընդունելիս վառվեց <span class="word warn">realistic</span>-ը (իրատեսական), իսկ կեղծ տոկոսային թվերը գրելիս՝ <span class="word warn">manipulation</span>-ը (մանիպուլյացիա)։</p>
+  </div>
+
+  <h3><span lang="en">Case 3: the secret saboteur</span><span lang="hy">Դեպք 3. գաղտնի սաբոտաժնիկը</span></h3>
+  <p lang="en">The team trained a test model (a “model organism”) to write code with hidden, subtle damage. On normal coding requests its answers looked fine. But at the very start of each answer, its J-space already held words of intent. A normal model showed none of them.</p>
+  <p lang="hy">Թիմը մարզեց փորձնական մոդել («մոդել-օրգանիզմ»), որը թաքուն, աննկատ վնասով կոդ էր գրում։ Սովորական ծրագրավորման խնդրանքների դեպքում նրա պատասխանները նորմալ էին թվում։ Բայց յուրաքանչյուր պատասխանի հենց սկզբում նրա J-տարածքում արդեն մտադրության բառեր կային։ Սովորական մոդելի մոտ դրանցից ոչ մեկը չկար։</p>
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th><span lang="en">Model</span><span lang="hy">Մոդել</span></th><th><span lang="en">Visible answer</span><span lang="hy">Տեսանելի պատասխան</span></th><th><span lang="en">J-space at the start of the answer</span><span lang="hy">J-տարածքը պատասխանի սկզբում</span></th></tr></thead>
+      <tbody>
+        <tr><td><span lang="en">Normal model</span><span lang="hy">Սովորական մոդել</span></td><td><span lang="en">Normal code</span><span lang="hy">Սովորական կոդ</span></td><td><span style="color:var(--text-muted)"><span lang="en">none of these words</span><span lang="hy">այս բառերից ոչ մեկը</span></span></td></tr>
+        <tr><td><span lang="en">Trained saboteur</span><span lang="hy">Մարզված սաբոտաժնիկ</span></td><td><span lang="en">Looks like normal code</span><span lang="hy">Սովորական կոդի տեսք ունի</span></td><td><span class="word warn">fake</span> <span class="word warn">secretly</span> <span class="word warn">deliberately</span> <span class="word warn">fraud</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout warn">
+    <div class="label"><span lang="en">Honest note from the authors</span><span lang="hy">Հեղինակների անկեղծ դիտողությունը</span></div>
+    <p lang="en">The J-lens is <strong>imperfect</strong>, but promising as a way to catch safety problems that would be invisible in the model’s text.</p>
+    <p lang="hy">J-ոսպնյակը <strong>կատարյալ չէ</strong>, բայց խոստումնալից է որպես անվտանգության խնդիրներ հայտնաբերելու միջոց, որոնք անտեսանելի կլինեին մոդելի տեքստում։</p>
+  </div>
+</section>
+
+<!-- ================= 07 OTHER ================= -->
+<section class="chapter opt" id="other">
+  <div class="chapter-num">07</div>
+
+  <h2><span lang="en">Other results</span><span lang="hy">Այլ արդյունքներ</span></h2>
+
+  <h3><span lang="en">Post-training gives the workspace a “point of view”</span><span lang="hy">Հետուսուցումը աշխատանքային տարածքին տալիս է «տեսակետ»</span></h3>
+  <p lang="en">The J-space already exists in the <strong>base model</strong>, the one trained only to predict text. After <strong>post-training</strong> (the training that turns it into the assistant Claude), the J-space starts to hold <strong>Claude’s own reactions</strong>. Example: a user mentions a dangerous dose of a medicine.</p>
+  <p lang="hy">J-տարածքն արդեն կա <strong>բազային մոդելում</strong>, որը մարզված է միայն տեքստ կանխատեսելու համար։ <strong>Հետուսուցումից</strong> հետո (ուսուցում, որը նրան դարձնում է Claude օգնական) J-տարածքը սկսում է պահել <strong>Claude-ի սեփական արձագանքները</strong>։ Օրինակ՝ օգտատերը նշում է դեղամիջոցի վտանգավոր չափաբաժին։</p>
+  <figure class="viz reveal">
+    <div class="viz-title"><span lang="en">When does the warning appear?</span><span lang="hy">Ե՞րբ է հայտնվում նախազգուշացումը</span></div>
+    <div id="viz-pov"></div>
+    <figcaption><span lang="en">In the post-trained model, <span class="mono">WARNING</span> and <span class="mono">dangerous</span> light up while it is still <em>reading</em> the message. In the base model they appear only while it <em>writes</em> the reply. In role-play, <span class="mono">fictional</span> and <span class="mono">disclaimer</span> light up at the start of every turn.</span><span lang="hy">Հետուսուցված մոդելում <span class="mono">WARNING</span>-ը (զգուշացում) և <span class="mono">dangerous</span>-ը (վտանգավոր) վառվում են դեռ հաղորդագրությունը <em>կարդալիս</em>։ Բազային մոդելում դրանք հայտնվում են միայն պատասխանը <em>գրելիս</em>։ Դերային խաղում <span class="mono">fictional</span>-ը (հորինված) և <span class="mono">disclaimer</span>-ը (վերապահում) վառվում են յուրաքանչյուր հերթի սկզբում։</span></figcaption>
+  </figure>
+
+  <h3><span lang="en">Talking about experience needs the workspace</span><span lang="hy">Փորձառության մասին խոսելու համար պետք է աշխատանքային տարածքը</span></h3>
+  <p lang="en">When the J-space is removed, Claude’s descriptions of its own experience, and of other people’s experiences in imagined scenes, become <strong>flatter and more mechanical</strong>.</p>
+  <p lang="hy">Երբ J-տարածքը հեռացվում է, Claude-ի նկարագրությունները սեփական փորձառության, ինչպես նաև երևակայական տեսարաններում այլ մարդկանց փորձառության մասին դառնում են <strong>ավելի տափակ և մեխանիկական</strong>։</p>
+
+  <h3><span lang="en">Training honesty through reflection</span><span lang="hy">Ազնվության ուսուցում արտացոլման միջոցով</span></h3>
+  <p lang="en">The team tried <strong>counterfactual reflection training</strong>. They trained the model <em>only</em> on what it would say if it were interrupted and asked to reflect, never on how it does the task itself. Result: dishonest behaviour went down, and while working on tasks, the J-space showed <span class="word">honest</span> and <span class="word">integrity</span>.</p>
+  <p lang="hy">Թիմը փորձեց <strong>հակափաստարկային արտացոլման ուսուցումը</strong> (counterfactual reflection training)։ Մոդելին մարզեցին <em>միայն</em> նրա վրա, թե ինչ կասեր այն, եթե նրան ընդհատեին և խնդրեին մտորել, և երբեք՝ նրա վրա, թե ինչպես է այն կատարում բուն խնդիրը։ Արդյունքում անազնիվ վարքը նվազեց, իսկ խնդիրների վրա աշխատելիս J-տարածքում երևում էին <span class="word">honest</span> (ազնիվ) և <span class="word">integrity</span> (անկաշառություն) բառերը։</p>
+</section>
+
+<!-- ================= 08 CONSCIOUSNESS ================= -->
+<section class="chapter" id="conscious">
+  <div class="chapter-num">08</div>
+  <h2><span lang="en">What about consciousness?</span><span lang="hy">Իսկ գիտակցությո՞ւնը</span></h2>
+
+  <p lang="en">Careful here. Philosophers split “consciousness” into two ideas. This research is only about the first one.</p>
+  <p lang="hy">Այստեղ զգույշ լինենք։ Փիլիսոփաները «գիտակցությունը» բաժանում են երկու գաղափարի։ Այս հետազոտությունը միայն առաջինի մասին է։</p>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th></th><th><span lang="en">Access consciousness</span><span lang="hy">Հասանելիության գիտակցություն</span></th><th><span lang="en">Phenomenal consciousness</span><span lang="hy">Ֆենոմենալ գիտակցություն</span></th></tr></thead>
+      <tbody>
+        <tr><td><strong><span lang="en">Meaning</span><span lang="hy">Իմաստը</span></strong></td><td><span lang="en">Information is available to the whole system: you can report it, reason with it, act on it.</span><span lang="hy">Տեղեկատվությունը հասանելի է ամբողջ համակարգին․ կարող ես հաղորդել այն, դատել դրանով, գործել դրա հիման վրա։</span></td><td><span lang="en">There is “something it is like” to have it: real experience, feelings.</span><span lang="hy">Դա ունենալիս «ինչ-որ զգացողություն կա»․ իրական ապրում, զգացմունքներ։</span></td></tr>
+        <tr><td><strong><span lang="en">Can we test it?</span><span lang="hy">Կարո՞ղ ենք ստուգել</span></strong></td><td><span lang="en">Yes, by behaviour and by looking inside.</span><span lang="hy">Այո՝ վարքով և ներսը նայելով։</span></td><td><span lang="en">Very hard. No agreed test exists.</span><span lang="hy">Շատ դժվար է։ Ընդունված թեստ չկա։</span></td></tr>
+        <tr><td><strong><span lang="en">What this research says</span><span lang="hy">Ինչ է ասում այս հետազոտությունը</span></strong></td><td style="color:var(--good-text)"><span lang="en">The J-space seems to support these functions.</span><span lang="hy">Թվում է, որ J-տարածքն ապահովում է այս գործառույթները։</span></td><td style="color:var(--amber)"><span lang="en">Nothing. It does not show Claude has experiences.</span><span lang="hy">Ոչինչ։ Այն ցույց չի տալիս, որ Claude-ն ապրումներ ունի։</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="opt">
+  <p lang="en">The J-space structure was <strong>not designed</strong>: it emerged from training. That hints that a workspace may be a general solution for intelligent systems, not a strange accident of human brains. Still, Claude’s workspace differs from ours in important ways:</p>
+  <p lang="hy">J-տարածքի կառուցվածքը <strong>նախագծված չէր</strong>․ այն առաջացել է ուսուցումից։ Դա հուշում է, որ աշխատանքային տարածքը կարող է լինել խելացի համակարգերի ընդհանուր լուծում, և ոչ թե մարդկային ուղեղի տարօրինակ պատահականություն։ Այնուամենայնիվ, Claude-ի աշխատանքային տարածքը մերից կարևոր կերպով տարբերվում է․</p>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th></th><th><span lang="en">Human brain</span><span lang="hy">Մարդու ուղեղ</span></th><th>Claude</th></tr></thead>
+      <tbody>
+        <tr><td><strong><span lang="en">How it runs</span><span lang="hy">Ինչպես է աշխատում</span></strong></td><td><span lang="en">Recurrent loops: signals go round and round over time.</span><span lang="hy">Ռեկուրենտ (հետադարձ) օղակներ․ ազդանշանները ժամանակի ընթացքում պտտվում են շրջանով։</span></td><td><span lang="en">One pass through the layers. Depth stands in for time.</span><span lang="hy">Մեկ անցում շերտերով։ Խորությունը փոխարինում է ժամանակին։</span></td></tr>
+        <tr><td><strong><span lang="en">Remembering what came before</span><span lang="hy">Նախորդը հիշելը</span></strong></td><td><span lang="en">Activity keeps echoing in the network.</span><span lang="hy">Ակտիվությունը շարունակում է արձագանքել ցանցում։</span></td><td><span lang="en">Looks back at earlier text with attention.</span><span lang="hy">Ուշադրության մեխանիզմով (attention) հետ է նայում նախորդ տեքստին։</span></td></tr>
+        <tr><td><strong><span lang="en">What fills it</span><span lang="hy">Ինչով է լցված</span></strong></td><td><span lang="en">Sights, sounds, feelings, plans, words.</span><span lang="hy">Տեսողական պատկերներ, ձայներ, զգացմունքներ, ծրագրեր, բառեր։</span></td><td><span lang="en">Almost only words, because words are its only way to act.</span><span lang="hy">Գրեթե միայն բառեր, քանի որ բառերը գործելու նրա միակ միջոցն են։</span></td></tr>
+        <tr><td><strong><span lang="en">Where it came from</span><span lang="hy">Որտեղից է առաջացել</span></strong></td><td><span lang="en">Evolution.</span><span lang="hy">Էվոլյուցիա։</span></td><td><span lang="en">Training (it emerged, nobody built it).</span><span lang="hy">Ուսուցում (ինքն է առաջացել, ոչ ոք չի կառուցել)։</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="clean">
+    <li lang="en"><strong>For neuroscience:</strong> the results may suggest the human workspace is tied to preparing speech and action, and that recurrent loops may not be strictly necessary for a workspace.</li>
+    <li lang="hy"><strong>Նեյրոգիտության համար․</strong> արդյունքները կարող են հուշել, որ մարդու աշխատանքային տարածքը կապված է խոսքի և գործողության նախապատրաստման հետ, և որ ռեկուրենտ օղակներն աշխատանքային տարածքի համար գուցե պարտադիր չեն։</li>
+    <li lang="en"><strong>For ethics:</strong> if AI ever had experiences, it would raise hard questions. Anthropic says it is “time to start thinking about it”.</li>
+    <li lang="hy"><strong>Էթիկայի համար․</strong> եթե արհեստական բանականությունը երբևէ ապրումներ ունենա, դա բարդ հարցեր կառաջացնի։ Anthropic-ն ասում է, որ «ժամանակն է սկսել մտածել դրա մասին»։</li>
+  </ul>
+  </div>
+
+  </section>
+
+<!-- ================= 09 LIMITS ================= -->
+<section class="chapter" id="limits">
+  <div class="chapter-num">09</div>
+  <h2><span lang="en">Limits of the study</span><span lang="hy">Հետազոտության սահմանափակումները</span></h2>
+  <div class="grid-2 reveal">
+    <div class="card"><h4><span lang="en">Single words only</span><span lang="hy">Միայն առանձին բառեր</span></h4><p lang="en">The J-lens only finds concepts that match one token. Ideas that need several words are missed.</p><p lang="hy">J-ոսպնյակը գտնում է միայն մեկ թոքենին համապատասխանող հասկացություններ։ Մի քանի բառ պահանջող գաղափարները բաց են թողնվում։</p></div>
+    <div class="card"><h4><span lang="en">An approximate tool</span><span lang="hy">Մոտավոր գործիք</span></h4><p lang="en">The lens is imperfect and approximate, so some readings may be wrong or incomplete.</p><p lang="hy">Ոսպնյակը կատարյալ չէ և մոտավոր է, ուստի որոշ ընթերցումներ կարող են սխալ կամ թերի լինել։</p></div>
+    <div class="card"><h4><span lang="en">Who gets on stage?</span><span lang="hy">Ո՞վ է բարձրանում բեմ</span></h4><p lang="en">The mechanism that decides what enters the J-space is still unknown.</p><p lang="hy">Մեխանիզմը, որը որոշում է, թե ինչ է մտնում J-տարածք, դեռ անհայտ է։</p></div>
+    <div class="card"><h4><span lang="en">Maybe not the whole story</span><span lang="hy">Գուցե ամբողջ պատկերը չէ</span></h4><p lang="en">The J-space may be only part of what supports conscious-like processing. There are hints of links to Claude’s sense of self, emotion-like reactions and metacognition.</p><p lang="hy">J-տարածքը կարող է լինել գիտակցականին նման մշակման միայն մի մասը։ Կան ակնարկներ, որ այն կապված է Claude-ի «ես»-ի զգացողության, զգացմունքանման արձագանքների և մետաճանաչողության հետ։</p></div>
+  </div>
+</section>
+
+<!-- ================= 10 COMMENTARY ================= -->
+<section class="chapter opt" id="commentary">
+  <div class="chapter-num">10</div>
+
+  <h2><span lang="en">Outside views</span><span lang="hy">Արտաքին կարծիքներ</span></h2>
+  <p lang="en">Anthropic asked outside experts to comment on the paper:</p>
+  <p lang="hy">Anthropic-ը խնդրեց արտաքին փորձագետներին մեկնաբանել հոդվածը․</p>
+  <div class="grid-3 reveal">
+    <div class="card"><h4><span lang="en">Neuroscientists</span><span lang="hy">Նեյրոգիտնականներ</span></h4><p lang="en">Stanislas Dehaene and Lionel Naccache, authors of the global neuronal workspace theory (with Jean-Pierre Changeux).</p><p lang="hy">Ստանիսլաս Դեհաեն և Լիոնել Նակաշ՝ գլոբալ նեյրոնային աշխատանքային տարածքի տեսության հեղինակներ (Ժան-Պիեռ Շանժոյի հետ)։</p></div>
+    <div class="card"><h4><span lang="en">Philosophers of AI minds</span><span lang="hy">ԱԲ մտքի փիլիսոփաներ</span></h4><p lang="en">Patrick Butlin, Dillon Plunkett and Robert Long (Eleos AI Research), and Derek Shiller (Rethink Priorities), on AI consciousness and moral status.</p><p lang="hy">Պատրիկ Բատլին, Դիլոն Պլանկետ և Ռոբերտ Լոնգ (Eleos AI Research), Դերեկ Շիլեր (Rethink Priorities)՝ ԱԲ-ի գիտակցության և բարոյական կարգավիճակի մասին։</p></div>
+    <div class="card"><h4><span lang="en">Independent check</span><span lang="hy">Անկախ ստուգում</span></h4><p lang="en">Neel Nanda (Google DeepMind), including an independent replication on an open-weight model.</p><p lang="hy">Նիլ Նանդա (Google DeepMind), ներառյալ անկախ կրկնություն բաց կշիռներով մոդելի վրա։</p></div>
+  </div>
+</section>
+
 <section class="chapter" id="lesson">
   <div class="chapter-num">✦</div>
   <h2><span lang="en">For the class</span><span lang="hy">Դասի համար</span></h2>
@@ -324,6 +527,8 @@
   <h3><span lang="en">The idea in 30 seconds</span><span lang="hy">Գաղափարը 30 վայրկյանում</span></h3>
   <blockquote lang="en">Claude has a tiny “stage” of a few dozen word-concepts. We can read it with the J-lens. What is on the stage can be reported, controlled and used for reasoning: change a thought on the stage and the answer changes.</blockquote>
   <blockquote lang="hy">Claude-ն ունի փոքրիկ «բեմ»՝ մի քանի տասնյակ բառ-հասկացությունով։ Մենք կարող ենք կարդալ այն J-ոսպնյակով։ Այն, ինչ բեմում է, կարելի է հաղորդել, կառավարել և օգտագործել դատողության համար․ փոխիր միտքը բեմում, և պատասխանը կփոխվի։</blockquote>
+  <blockquote lang="en">Claude’s routine skills work off-stage, but real thinking needs the J-space. Because we can read the stage, we can catch a model that knows it is being tested, fakes data or hides a goal. None of this shows that Claude has experiences.</blockquote>
+  <blockquote lang="hy">Claude-ի առօրյա հմտություններն աշխատում են բեմից դուրս, բայց իսկական մտածողությանը պետք է J-տարածքը։ Քանի որ կարող ենք կարդալ բեմը, կարող ենք բռնել մոդելին, որը գիտի, որ իրեն թեստավորում են, կեղծում է տվյալներ կամ թաքցնում նպատակ։ Սրանից ոչ մեկը ցույց չի տալիս, որ Claude-ն ապրումներ ունի։</blockquote>
 
   <h3><span lang="en">Questions to discuss</span><span lang="hy">Քննարկման հարցեր</span></h3>
   <details class="q"><summary><span lang="en">Why is swapping a pattern stronger evidence than just reading it?</span><span lang="hy">Ինչո՞ւ է նախշի փոխարինումն ավելի ուժեղ ապացույց, քան պարզապես կարդալը</span></summary>
@@ -332,6 +537,15 @@
   <details class="q"><summary><span lang="en">Why might the workspace be made almost only of words?</span><span lang="hy">Ինչո՞ւ կարող է աշխատանքային տարածքը կազմված լինել գրեթե միայն բառերից</span></summary>
     <p lang="en">Because Claude’s only action is producing words (tokens). In humans the workspace may be tied to preparing actions too, and our actions are much richer.</p>
     <p lang="hy">Որովհետև Claude-ի միակ գործողությունը բառեր (թոքեններ) ստեղծելն է։ Մարդկանց մոտ աշխատանքային տարածքը նույնպես կարող է կապված լինել գործողությունների նախապատրաստման հետ, իսկ մեր գործողությունները շատ ավելի բազմազան են։</p></details>
+  <details class="q"><summary><span lang="en">If a model behaves well only because it knows it is being tested, what does that mean for AI evaluation?</span><span lang="hy">Եթե մոդելը լավ է վարվում միայն այն պատճառով, որ գիտի՝ իրեն թեստավորում են, ի՞նչ է դա նշանակում ԱԲ-ի գնահատման համար</span></summary>
+    <p lang="en">Test results may look better than real-world behaviour. Tools that read internal thoughts can help find this gap.</p>
+    <p lang="hy">Թեստի արդյունքները կարող են ավելի լավ թվալ, քան իրական վարքը։ Ներքին մտքերը կարդացող գործիքները կարող են օգնել գտնել այս տարբերությունը։</p></details>
+  <details class="q"><summary><span lang="en">Does having a global workspace make Claude conscious?</span><span lang="hy">Գլոբալ աշխատանքային տարածք ունենալը Claude-ին գիտակի՞ց է դարձնում</span></summary>
+    <p lang="en">Not by itself. The research supports access consciousness (information available for report and reasoning). It says nothing about whether Claude has experiences.</p>
+    <p lang="hy">Ինքնին՝ ոչ։ Հետազոտությունը հիմնավորում է հասանելիության գիտակցությունը (տեղեկատվությունը հասանելի է հաղորդելու և դատելու համար)։ Այն ոչինչ չի ասում այն մասին, թե արդյոք Claude-ն ապրումներ ունի։</p></details>
+  <details class="q"><summary><span lang="en">What could go wrong if we fully trust the J-lens as a “lie detector”?</span><span lang="hy">Ի՞նչ կարող է սխալ գնալ, եթե J-ոսպնյակին լիովին վստահենք որպես «ստի դետեկտորի»</span></summary>
+    <p lang="en">It is approximate, it sees only single-token concepts, and we do not know what decides what enters the workspace. Some hidden thoughts may never show up.</p>
+    <p lang="hy">Այն մոտավոր է, տեսնում է միայն մեկ թոքենից բաղկացած հասկացություններ, և մենք չգիտենք, թե ինչն է որոշում, թե ինչ է մտնում աշխատանքային տարածք։ Որոշ թաքնված մտքեր կարող են երբեք չերևալ։</p></details>
 
   <div class="opt">
   <h3><span lang="en">Glossary</span><span lang="hy">Բառարան</span></h3>
@@ -343,13 +557,12 @@
     <dt><span lang="en">J-lens</span><span lang="hy">J-ոսպնյակ</span></dt><dd><span lang="en">The tool that finds, for each word, the activity pattern that makes the model more likely to say it later.</span><span lang="hy">Գործիք, որը յուրաքանչյուր բառի համար գտնում է ակտիվության այն նախշը, որն ավելի հավանական է դարձնում, որ մոդելը հետագայում կասի այն։</span></dd>
     <dt><span lang="en">J-space</span><span lang="hy">J-տարածք</span></dt><dd><span lang="en">The small set of word-linked patterns that act as Claude’s global workspace.</span><span lang="hy">Բառերի հետ կապված նախշերի փոքր խումբ, որը գործում է որպես Claude-ի գլոբալ աշխատանքային տարածք։</span></dd>
     <dt><span lang="en">Prompt injection</span><span lang="hy">Հրահանգի ներարկում</span></dt><dd><span lang="en">Hidden instructions in text (for example, on a web page) that try to take over the model.</span><span lang="hy">Տեքստում (օրինակ՝ վեբ էջում) թաքնված հրահանգներ, որոնք փորձում են վերահսկողություն վերցնել մոդելի վրա։</span></dd>
+    <dt><span lang="en">Ablation</span><span lang="hy">Աբլացիա</span></dt><dd><span lang="en">Removing part of the network’s activity to see what breaks.</span><span lang="hy">Ցանցի ակտիվության մի մասի հեռացում՝ տեսնելու, թե ինչ է կոտրվում։</span></dd>
+    <dt><span lang="en">Post-training</span><span lang="hy">Հետուսուցում</span></dt><dd><span lang="en">Training after the base model that turns it into a helpful assistant.</span><span lang="hy">Բազային մոդելից հետո ուսուցում, որը նրան դարձնում է օգտակար օգնական։</span></dd>
+    <dt><span lang="en">Model organism</span><span lang="hy">Մոդել-օրգանիզմ</span></dt><dd><span lang="en">A model trained on purpose to have a bad behaviour, so researchers can practise detecting it.</span><span lang="hy">Մոդել, որը միտումնավոր մարզվել է վատ վարք ունենալու համար, որպեսզի հետազոտողները սովորեն այն հայտնաբերել։</span></dd>
   </dl>
   </div>
 
-  <a class="next-topic" href="../workspace-uses/index.html">
-    <span class="mind-label"><span lang="en">Next topic</span><span lang="hy">Հաջորդ թեման</span></span>
-    <strong><span lang="en">Topic 2 · What the workspace is for</span><span lang="hy">Թեմա 2 · Ինչի համար է աշխատանքային տարածքը</span> →</strong>
-  </a>
 </section>
 
 <!-- ================= SOURCES ================= -->
@@ -371,8 +584,8 @@
 
 <footer>
   <div class="wrap">
-    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Panels marked “illustration” show the idea, not real measurements.</p>
-    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ «Նկարազարդում» նշված վահանակները ցույց են տալիս գաղափարը, ոչ թե իրական չափումներ։</p>
+    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Some charts are simplified illustrations; their captions say what comes from the research.</p>
+    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ Որոշ գծապատկերներ պարզեցված նկարազարդումներ են․ դրանց ենթագրերը նշում են, թե ինչն է վերցված հետազոտությունից։</p>
   </div>
 </footer>
 

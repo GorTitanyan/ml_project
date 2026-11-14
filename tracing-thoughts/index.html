@@ -17,8 +17,8 @@
 <body>
 
 <header class="topbar">
-  <a class="brand" href="../index.html"><img class="brand-logo logo-dark" src="../assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="../assets/logo-light.svg" alt="" width="30" height="30">
-    <span lang="en">ML Research Seminar</span><span lang="hy">ML հետազոտական սեմինար</span></a>
+  <a class="brand" href="../index.html" title="ML Research Seminar — home"><img class="brand-logo logo-dark" src="../assets/logo.svg" alt="" width="30" height="30"><img class="brand-logo logo-light" src="../assets/logo-light.svg" alt="" width="30" height="30">
+    <span lang="en">Topic 1 · Tracing the thoughts of a language model</span><span lang="hy">Թեմա 1 · Լեզվական մոդելի մտքերի հետագծումը</span></a>
   <div class="topbar-right">
     <div class="lang-switch" role="group" aria-label="Language">
       <button data-lang="en" aria-pressed="true">EN</button>
@@ -32,7 +32,7 @@
 <section class="hero">
   <canvas id="hero-circuit" aria-hidden="true"></canvas>
   <div class="hero-inner">
-    <span class="kicker"><span lang="en">Topic 3 · Interpretability · Anthropic research · 27 March 2025</span><span lang="hy">Թեմա 3 · Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2025 թ. մարտի 27</span></span>
+    <span class="kicker"><span lang="en">Topic 1 · Interpretability · Anthropic research · 27 March 2025</span><span lang="hy">Թեմա 1 · Մեկնաբանելիություն · Anthropic-ի հետազոտություն · 2025 թ. մարտի 27</span></span>
     <h1><span lang="en">Tracing the thoughts of a large language model</span><span lang="hy">Մեծ լեզվական մոդելի մտքերի հետագծումը</span></h1>
     <p class="lead" lang="en">Researchers built an “AI microscope” and watched how Claude thinks step by step: it plans rhymes ahead, does sums its own way, sometimes makes up its reasoning, and gets tricked by jailbreaks for a surprising reason.</p>
     <p class="lead" lang="hy">Հետազոտողները ստեղծեցին «ԱԲ մանրադիտակ» և քայլ առ քայլ դիտեցին, թե ինչպես է Claude-ը մտածում․ նա նախապես պլանավորում է հանգերը, գումարում է յուրովի, երբեմն հորինում է իր դատողությունները և խաբվում է jailbreak-ներից մի անսպասելի պատճառով։</p>
@@ -56,7 +56,7 @@
     <li><a href="#hallucination"><span lang="en">06 · Hallucinations</span><span lang="hy">06 · Հալյուցինացիաներ</span></a></li>
     <li><a href="#jailbreak"><span lang="en">07 · Jailbreaks</span><span lang="hy">07 · Jailbreak-ներ</span></a></li>
     <li class="opt"><a href="#limits"><span lang="en">08 · Limits</span><span lang="hy">08 · Սահմանափակումներ</span></a></li>
-    <li class="opt"><a href="#compare"><span lang="en">09 · Link to topic 1</span><span lang="hy">09 · Կապը 1-ին թեմայի հետ</span></a></li>
+    <li class="opt"><a href="#compare"><span lang="en">09 · Link to topic 3</span><span lang="hy">09 · Կապը 3-րդ թեմայի հետ</span></a></li>
     <li><a href="#lesson"><span lang="en">For the class</span><span lang="hy">Դասի համար</span></a></li>
     <li><a href="#sources"><span lang="en">Sources</span><span lang="hy">Աղբյուրներ</span></a></li>
   </ol>
@@ -179,7 +179,7 @@
   <p lang="hy">Claude-ին ոչ մի մաթեմատիկական ալգորիթմ չեն սովորեցրել, բայց նա ճիշտ է գումարում 36 + 59։ Ինչպե՞ս։ Նա պարզապես աղյուսակ չի հիշում և չի օգտագործում դպրոցական սյունակով գումարումը։ Փոխարենը, նա <strong>զուգահեռ աշխատեցնում է երկու ուղի</strong>․ մեկը գտնում է պատասխանի <strong>մոտավոր չափը</strong>, մյուսը՝ <strong>ճշգրիտ վերջին թվանշանը</strong>։ Միասին դրանք տալիս են պատասխանը։</p>
 
   <figure class="viz reveal">
-    <div class="viz-title"><span lang="en">Try your own numbers</span><span lang="hy">Փորձեք ձեր թվերը</span><span class="badge-illus"><span lang="en">simplified model of the idea</span><span lang="hy">գաղափարի պարզեցված մոդել</span></span></div>
+    <div class="viz-title"><span lang="en">Try your own numbers</span><span lang="hy">Փորձեք ձեր թվերը</span></div>
     <div class="viz-sub"><span lang="en">Type two numbers from 10 to 99.</span><span lang="hy">Մուտքագրեք երկու թիվ 10-ից 99։</span></div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;font:600 22px var(--mono)">
       <input id="math-a" type="number" min="10" max="99" value="36" style="width:90px;font:inherit;background:var(--io-bg);color:var(--text-primary);border:1px solid var(--line);border-radius:8px;padding:6px 10px">
@@ -192,7 +192,7 @@
   </figure>
 
   <div class="opt">
-  <h3><span lang="en">What Claude says vs. what Claude does</span><span lang="hy">Ինչ է ասում Claude-ը և ինչ է անում</span><span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span></h3>
+  <h3><span lang="en">What Claude says vs. what Claude does</span><span lang="hy">Ինչ է ասում Claude-ը և ինչ է անում</span></h3>
   <p lang="en">Ask Claude how it got 95, and it describes the school method: “add the ones, carry the 1…”. But the microscope shows it did something else. It probably learned to <em>explain</em> maths from human texts, while it learned to <em>do</em> maths its own way.</p>
   <p lang="hy">Հարցրեք Claude-ին, թե ինչպես ստացավ 95, և նա կնկարագրի դպրոցական մեթոդը․ «գումարում ենք միավորները, 1-ը տեղափոխում ենք…»։ Բայց մանրադիտակը ցույց է տալիս, որ նա այլ բան է արել։ Հավանաբար նա մաթեմատիկան <em>բացատրել</em> սովորել է մարդկանց գրած տեքստերից, իսկ մաթեմատիկան <em>անել</em> սովորել է յուրովի։</p>
   <div class="grid-2 reveal">
@@ -234,7 +234,7 @@
 <!-- ================= 05 MULTISTEP ================= -->
 <section class="chapter opt" id="multistep">
   <div class="chapter-num">05</div>
-  <span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span>
+
   <h2><span lang="en">Multi-step reasoning: Dallas → Texas → Austin</span><span lang="hy">Բազմաքայլ դատողություն՝ Դալաս → Տեխաս → Օսթին</span></h2>
 
   <p lang="en">Question: <em>“What is the capital of the state where Dallas is located?”</em> A model could simply have memorised the answer. But the microscope shows two real steps: first <strong>Dallas is in Texas</strong>, then <strong>the capital of Texas is Austin</strong>. To prove the middle step matters, the team swapped “Texas” for “California”, and the answer changed from Austin to Sacramento.</p>
@@ -296,7 +296,7 @@
 <!-- ================= 08 LIMITS ================= -->
 <section class="chapter opt" id="limits">
   <div class="chapter-num">08</div>
-  <span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span>
+
   <h2><span lang="en">Limits, and why it still matters</span><span lang="hy">Սահմանափակումներ, և ինչու է սա այնուամենայնիվ կարևոր</span></h2>
   <div class="grid-2 reveal">
     <div class="card"><h4><span lang="en">Only a fraction</span><span lang="hy">Միայն մի մասը</span></h4><p lang="en">Even on short, simple prompts, the method captures only part of what the model computes.</p><p lang="hy">Նույնիսկ կարճ, պարզ հարցումների դեպքում մեթոդը ներառում է մոդելի հաշվարկների միայն մի մասը։</p></div>
@@ -311,8 +311,8 @@
 <!-- ================= 09 COMPARE ================= -->
 <section class="chapter opt" id="compare">
   <div class="chapter-num">09</div>
-  <span class="opt-tag"><span lang="en">optional</span><span lang="hy">ըստ ցանկության</span></span>
-  <h2><span lang="en">How this connects to topic 1 (the J-space)</span><span lang="hy">Ինչպես է սա կապված 1-ին թեմայի (J-տարածքի) հետ</span></h2>
+
+  <h2><span lang="en">How this connects to topic 3 (the J-space)</span><span lang="hy">Ինչպես է սա կապված 3-րդ թեմայի (J-տարածքի) հետ</span></h2>
   <p lang="en">The two articles are about a year apart and use different tools, but they tell one story: models really do have hidden middle steps, and we can read and change them.</p>
   <p lang="hy">Երկու հոդվածների միջև մոտ մեկ տարի է, և դրանք օգտագործում են տարբեր գործիքներ, բայց պատմում են մեկ պատմություն․ մոդելներն իսկապես ունեն թաքնված միջանկյալ քայլեր, և մենք կարող ենք կարդալ ու փոխել դրանք։</p>
   <div class="table-wrap reveal">
@@ -328,7 +328,7 @@
       </tbody>
     </table>
   </div>
-  <p><a href="../global-workspace/index.html"><span lang="en">→ Open topic 1</span><span lang="hy">→ Բացել 1-ին թեման</span></a></p>
+  <p><a href="../global-workspace/index.html"><span lang="en">→ Open topic 3</span><span lang="hy">→ Բացել 3-րդ թեման</span></a></p>
 </section>
 
 <!-- ================= LESSON ================= -->
@@ -367,6 +367,11 @@
     <dt><span lang="en">Jailbreak</span><span lang="hy">Jailbreak</span></dt><dd><span lang="en">A trick prompt that gets around safety rules.</span><span lang="hy">Խորամանկ հարցում, որը շրջանցում է անվտանգության կանոնները։</span></dd>
   </dl>
   </div>
+
+  <a class="next-topic" href="../introspection/index.html">
+    <span class="mind-label"><span lang="en">Next topic</span><span lang="hy">Հաջորդ թեման</span></span>
+    <strong><span lang="en">Topic 2 · Can a language model notice its own thoughts?</span><span lang="hy">Թեմա 2 · Կարո՞ղ է լեզվական մոդելը նկատել իր սեփական մտքերը</span> →</strong>
+  </a>
 </section>
 
 <!-- ================= SOURCES ================= -->
@@ -386,8 +391,8 @@
 
 <footer>
   <div class="wrap">
-    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Panels marked as simplified show the idea, not real measurements.</p>
-    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ Պարզեցված նշված վահանակները ցույց են տալիս գաղափարը, ոչ թե իրական չափումներ։</p>
+    <p lang="en">A student project for our ML lessons. The research belongs to Anthropic; this page retells it in our own words, with our own drawings and simplified demos. Some charts are simplified illustrations; their captions say what comes from the research.</p>
+    <p lang="hy">Ուսանողական նախագիծ՝ մեր ML դասերի համար։ Հետազոտությունը պատկանում է Anthropic-ին․ այս էջը այն վերապատմում է մեր բառերով, մեր նկարներով և պարզեցված ցուցադրություններով։ Որոշ գծապատկերներ պարզեցված նկարազարդումներ են․ դրանց ենթագրերը նշում են, թե ինչն է վերցված հետազոտությունից։</p>
   </div>
 </footer>
 
