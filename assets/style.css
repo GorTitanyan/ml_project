@@ -317,7 +317,7 @@ html[data-theme="light"] .theme-btn .moon, html:not([data-theme="light"]) .theme
 html[data-theme="light"] .logo-dark, html:not([data-theme="light"]) .logo-light { display: none; }
 
 /* ---------- small screens ---------- */
-h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
+h1, h2, h3 { overflow-wrap: break-word; hyphens: manual; }
 @media (max-width: 720px) {
   .topbar { padding: 10px 14px; gap: 10px; }
   .topbar-right { gap: 8px; }
