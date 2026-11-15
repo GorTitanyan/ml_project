@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signs of introspection in large language models</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080b; --bg2:#0c0e13;
+  --ink:#eeece6; --ink2:#c9c7c0; --mute:#9196a1; --dim:#5d626e; --faint:#262931;
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.14);
+  --amber:#ffb547; --amber-soft:rgba(255,181,71,.10); --amber-line:rgba(255,181,71,.45);
+  --red:#ff6b5b; --red-soft:rgba(255,107,91,.10); --red-line:rgba(255,107,91,.5);
+  --blue:#8fb0ff; --blue-soft:rgba(143,176,255,.10); --blue-line:rgba(143,176,255,.5);
+  --green:#86dcae;
+  --serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+#sea{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 65% at 50% 50%,rgba(7,8,11,.82) 0%,rgba(7,8,11,.55) 55%,rgba(7,8,11,.15) 100%)}
+#viewport{position:fixed;inset:0;z-index:1}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+
+/* ---------- slides ---------- */
+.slide{position:absolute;inset:0;padding:120px 128px 96px;opacity:0;visibility:hidden;transform:scale(.985);
+  transition:opacity .3s ease,transform .4s ease,visibility 0s linear .4s}
+/* Fade through, not cross-fade: the old slide is gone before the new one fades in, so two headlines in the same spot never overlap. */
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease .28s,transform .8s cubic-bezier(.2,.7,.2,1) .28s,visibility 0s}
+.slide.past{transform:scale(1.01)}
+
+/* step reveals */
+[data-step]{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+[data-step].on{opacity:1;transform:none}
+[data-out]{transition:opacity .5s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+[data-out].off{opacity:0;transform:translateY(-14px);pointer-events:none}
+.stack{display:grid;align-items:center}
+.stack>*{grid-area:1/1}
+
+/* type */
+h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0;letter-spacing:-.012em}
+em{font-style:italic;color:var(--amber)}
+.h-xl{font-size:128px;line-height:.96}
+.h-l{font-size:88px;line-height:1.0}
+.h-m{font-size:64px;line-height:1.06}
+.h-s{font-size:42px;line-height:1.18}
+.kicker{font:500 15px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+.lede{font-size:28px;line-height:1.45;color:var(--mute);font-weight:300;margin:0}
+.note{font-size:20px;line-height:1.5;color:var(--mute);font-weight:300}
+.mute{color:var(--mute)} .dimc{color:var(--dim)}
+.mono{font-family:var(--mono)}
+.label{font:500 13px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.label.j{color:var(--amber)}
+.label.j::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber);margin-right:10px;vertical-align:1px}
+.label.r{color:var(--red)}
+.label.b{color:var(--blue)}
+.hd{margin-bottom:54px}
+.hd .kicker{margin-bottom:22px;display:block}
+.center{text-align:center}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:8px;font:500 24px/1 var(--mono);padding:11px 18px;border-radius:999px;color:var(--amber);background:var(--amber-soft);border:1px solid var(--amber-line);box-shadow:0 0 30px rgba(255,181,71,.16),inset 0 0 14px rgba(255,181,71,.05);white-space:nowrap}
+.chip.soft{color:#e7c48f;border-color:rgba(255,181,71,.25);box-shadow:none;background:rgba(255,181,71,.05)}
+.chip.red{color:var(--red);background:var(--red-soft);border-color:var(--red-line);box-shadow:0 0 30px rgba(255,107,91,.16)}
+.chip.blue{color:var(--blue);background:var(--blue-soft);border-color:var(--blue-line);box-shadow:0 0 24px rgba(143,176,255,.12)}
+.chip.ghost{color:var(--mute);background:transparent;border-color:var(--line2);box-shadow:none}
+.chip.cut{color:var(--blue);background:transparent;border-color:var(--blue-line);box-shadow:none;text-decoration:line-through;text-decoration-thickness:2px}
+.chip.lg{font-size:40px;padding:18px 32px}
+.chip.md{font-size:30px;padding:14px 24px}
+.chip.sm{font-size:19px;padding:8px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* panels */
+.panel{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012));padding:28px 32px}
+.jpanel{position:relative;border-radius:24px;padding:24px 28px;border:1px solid rgba(255,181,71,.28);
+  background:radial-gradient(120% 140% at 50% 0%,rgba(255,181,71,.10),rgba(255,181,71,.02) 60%,rgba(255,181,71,0));box-shadow:inset 0 0 60px rgba(255,181,71,.05)}
+.jpanel .label{margin-bottom:18px;display:block}
+.say{font-size:25px;line-height:1.42;padding:22px 26px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink2)}
+.say .who{display:block;font:500 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+.say.out{background:rgba(255,255,255,.015)}
+.say b{color:var(--ink);font-weight:500}
+.swap-tag{display:inline-flex;align-items:center;gap:8px;font:500 14px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--blue);padding:8px 12px;border:1px dashed var(--blue-line);border-radius:999px;background:var(--blue-soft)}
+.arrow{flex:none;width:64px;height:2px;background:linear-gradient(90deg,rgba(255,255,255,0),var(--dim));position:relative}
+.arrow::after{content:"";position:absolute;right:-1px;top:-5px;border-left:9px solid var(--dim);border-top:6px solid transparent;border-bottom:6px solid transparent}
+.flow{display:flex;align-items:center;gap:26px}
+
+/* chrome */
+.chrome{position:absolute;z-index:5;pointer-events:none;transition:opacity .5s}
+.chrome-sec{top:48px;left:128px;font:500 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.chrome-count{bottom:40px;right:128px;font:500 13px/1 var(--mono);letter-spacing:.14em;color:var(--dim)}
+.chrome-next{bottom:40px;left:128px;font:500 13px/1 var(--mono);letter-spacing:.08em;color:var(--dim);opacity:0}
+.chrome-next b{color:var(--amber);font-weight:500}
+body.hint .chrome-next{opacity:1}
+#stage.nochrome .chrome-sec,#stage.nochrome .chrome-count{opacity:0}
+#progress{position:fixed;left:0;bottom:0;height:2px;background:linear-gradient(90deg,rgba(255,181,71,.2),var(--amber));box-shadow:0 0 12px var(--amber);z-index:6;transition:width .6s cubic-bezier(.2,.7,.2,1)}
+
+/* ---------- title ---------- */
+.s-title .title-wrap{position:absolute;left:128px;top:270px}
+.s-title .kicker{margin-bottom:38px;display:block}
+.s-title h1{margin-bottom:40px}
+.s-title .lede{font-size:32px}
+.title-foot{position:absolute;left:128px;bottom:72px;font-size:14px;letter-spacing:.06em;color:var(--dim)}
+.float-words{position:absolute;inset:0;pointer-events:none}
+.float-words .chip{position:absolute;animation:drift 9s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+/* ---------- agenda ---------- */
+.agenda{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:34px 90px;margin-top:20px}
+.agenda li{display:grid;grid-template-columns:88px 1fr;align-items:baseline;padding:22px 0;border-top:1px solid var(--line);cursor:pointer;pointer-events:auto}
+.agenda li:hover .t{color:var(--amber)}
+.agenda .n{font:500 18px/1 var(--mono);color:var(--amber)}
+.agenda .t{font-family:var(--serif);font-size:50px;line-height:1.05;transition:color .3s}
+.agenda .d{grid-column:2;font-size:20px;color:var(--mute);margin-top:8px;font-weight:300}
+
+/* ---------- divider ---------- */
+.divider{display:flex;flex-direction:column;justify-content:center;padding-left:200px}
+.divider .d-num{font:500 18px/1 var(--mono);color:var(--amber);letter-spacing:.22em;text-transform:uppercase;margin-bottom:40px}
+.divider .d-num::after{content:"";display:inline-block;width:80px;height:1px;background:var(--amber-line);vertical-align:middle;margin-left:20px}
+.divider h2{margin-bottom:10px}
+.divider .d-q{max-width:1180px;font-size:96px;line-height:1.02}
+.d-contents{list-style:none;padding:0;margin:56px 0 0;display:flex;flex-wrap:wrap;gap:12px 12px;max-width:1100px}
+.d-contents li{font:400 17px/1 var(--mono);color:var(--dim);padding:10px 16px;border:1px solid var(--line);border-radius:999px}
+/* ---------- definitions ---------- */
+.defn{margin-top:26px;border:1px solid var(--amber-line);border-radius:20px;padding:20px 24px;background:var(--amber-soft)}
+.defn .label{display:block;margin-bottom:12px}
+.defn p{margin:0;font-size:24px;line-height:1.4;color:var(--ink);font-weight:300}
+.defn p b{font-weight:500;color:var(--amber)}
+.defn .sub{margin-top:10px;font-size:19px;color:var(--mute)}
+.defn .sub b{color:var(--ink)}
+.h-q{font-family:var(--serif);font-weight:400;font-size:58px;line-height:1.06;margin:0;letter-spacing:-.012em}
+
+/* ---------- five properties ---------- */
+.props{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:10px}
+.prop{border:1px solid var(--line);border-radius:22px;padding:28px 26px 30px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.008));min-height:300px;display:flex;flex-direction:column}
+.prop .n{font:500 14px/1 var(--mono);color:var(--dim);letter-spacing:.14em}
+.prop svg{width:56px;height:56px;margin:26px 0 24px;stroke:var(--amber);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(255,181,71,.35))}
+.prop h3{font-size:42px;line-height:1}
+.prop p{font-size:21px;line-height:1.4;color:var(--mute);margin:14px 0 0;font-weight:300}
+.tqs{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin-top:22px}
+.tq{border:1px dashed var(--amber-line);border-radius:18px;padding:16px 20px 18px;background:var(--amber-soft);font-family:var(--serif);font-style:italic;font-size:23px;line-height:1.2;color:var(--amber)}
+.tq span{display:block;font:500 12px/1 var(--mono);font-style:normal;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.tq:nth-child(2){transition-delay:.08s}.tq:nth-child(3){transition-delay:.16s}.tq:nth-child(4){transition-delay:.24s}.tq:nth-child(5){transition-delay:.32s}
+.props-foot{margin-top:30px;font-size:26px;color:var(--ink2);font-weight:300}
+.props-foot b{color:var(--amber);font-weight:400}
+
+/* ---------- statement ---------- */
+.statement{display:flex;flex-direction:column;justify-content:center}
+.statement h2{max-width:1250px}
+.statement .follow{margin-top:56px;max-width:1200px}
+
+/* ---------- tests: flows ---------- */
+.tflow{display:grid;grid-template-columns:400px 64px 400px 64px 1fr;align-items:center;gap:0 22px;margin-top:20px}
+.tflow .jpanel{min-height:230px;display:flex;flex-direction:column;justify-content:center}
+.tflow .stack{justify-items:start}
+.punch{margin-top:62px;display:flex;align-items:center;gap:22px}
+.punch .h-s{font-size:40px}
+.under{margin-top:16px}
+.out-big{font-family:var(--serif);font-size:54px;color:var(--ink);line-height:1}
+/* consciousness */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:10px}
+.cbox{border:1px solid var(--line);border-radius:26px;padding:44px 46px;min-height:420px;display:flex;flex-direction:column}
+.cbox .label{display:block;margin-bottom:30px}
+.cbox h3{font-size:58px;line-height:1.04}
+.cbox .q{font-size:26px;color:var(--mute);margin-top:22px;font-weight:300;line-height:1.4}
+.cbox .verdict{margin-top:auto;font-family:var(--serif);font-size:34px;font-style:italic}
+.cbox.off{opacity:.55}
+.cbox.lit{border-color:var(--amber-line);background:radial-gradient(120% 120% at 50% 0%,rgba(255,181,71,.10),rgba(255,181,71,0) 70%)}
+.cbox.lit .verdict{color:var(--amber)}
+
+.cmp{display:grid;grid-template-columns:260px 1fr 1fr;margin-top:10px}
+.cmp>div{padding:24px 0;border-bottom:1px solid var(--line);font-size:25px;font-weight:300;color:var(--ink2);line-height:1.35;padding-right:30px}
+.cmp .h{font:500 13px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);padding-bottom:18px}
+.cmp .h.c{color:var(--amber)}
+.cmp .k{font-family:var(--serif);font-size:34px;color:var(--ink)}
+.cmp .cl{color:var(--ink)}
+
+.fb{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:64px}
+.fb .panel{display:flex;gap:22px;align-items:flex-start}
+.fb .panel .i{font:500 22px/1 var(--mono);color:var(--amber);margin-top:6px}
+.fb .panel p{margin:0;font-size:24px;line-height:1.4;color:var(--ink2);font-weight:300}
+.fb .panel p b{color:var(--ink);font-weight:400}
+
+.open{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.open li{display:grid;grid-template-columns:80px 1fr 1fr;align-items:baseline;gap:20px;padding:26px 0;border-bottom:1px solid var(--line)}
+.open .n{font:500 16px/1 var(--mono);color:var(--amber)}
+.open .t{font-family:var(--serif);font-size:42px;line-height:1.05}
+.open .d{font-size:21px;color:var(--mute);font-weight:300;line-height:1.4}
+
+.takes{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:10px}
+.take{border:1px solid var(--line);border-radius:24px;padding:36px 34px 40px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.008));min-height:430px;display:flex;flex-direction:column}
+.take .n{font:500 16px/1 var(--mono);color:var(--amber);letter-spacing:.14em}
+.take h3{font-size:48px;line-height:1.04;margin:40px 0 24px}
+.take p{font-size:23px;line-height:1.45;color:var(--mute);margin:0;font-weight:300}
+.s-close{display:flex;flex-direction:column;justify-content:center}
+.s-close blockquote{margin:0;font-family:var(--serif);font-size:76px;line-height:1.08;max-width:1300px}
+.s-close blockquote .q{color:var(--amber)}
+.s-close .src{margin-top:26px;font:400 16px/1 var(--mono);color:var(--dim);letter-spacing:.06em}
+.s-close .thanks{margin-top:90px;display:flex;align-items:flex-end;justify-content:space-between}
+.s-close .thanks h3{font-size:64px}
+.links{font:400 16px/2 var(--mono);color:var(--mute);text-align:right}
+.links b{color:var(--amber);font-weight:500;margin-right:10px}
+
+/* ---------- overview ---------- */
+#overview{position:fixed;inset:0;z-index:20;background:rgba(7,8,11,.96);backdrop-filter:blur(10px);overflow:auto;padding:48px 56px 80px;display:none}
+body.ov #overview{display:block}
+.ov-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:26px}
+.ov-head h2{font-size:44px}
+.ov-head span{font:400 14px var(--mono);color:var(--dim)}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:22px 18px}
+.ov-sec{grid-column:1/-1;font:500 13px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.thumb{all:unset;cursor:pointer;display:block}
+.thumb-box{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--bg);border:1px solid var(--line);transition:border-color .2s,transform .2s}
+.thumb:hover .thumb-box{border-color:var(--amber-line);transform:translateY(-2px)}
+.thumb.cur .thumb-box{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber),0 0 30px rgba(255,181,71,.2)}
+.thumb-cap{display:flex;gap:10px;margin-top:10px;font-size:14px;color:var(--mute)}
+.thumb-cap b{font:500 12px var(--mono);color:var(--dim);font-weight:500;padding-top:2px}
+.frame-inner{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;pointer-events:none}
+.frame-inner .slide{opacity:1;visibility:visible;transform:none;transition:none}
+.frame-inner *{transition:none!important}
+.frame-inner .float-words .chip{animation:none}
+
+/* ---------- help ---------- */
+#help{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(7,8,11,.8);backdrop-filter:blur(6px)}
+body.help #help{display:grid}
+.help-card{border:1px solid var(--line2);border-radius:20px;background:#0d0f14;padding:34px 40px;min-width:460px}
+.help-card h3{font-size:36px;margin-bottom:20px}
+.help-card dl{display:grid;grid-template-columns:150px 1fr;gap:12px 20px;margin:0;font-size:16px;color:var(--ink2)}
+.help-card dt{font:500 14px var(--mono);color:var(--amber)}
+.help-card dd{margin:0}
+
+/* ---------- presenter ---------- */
+#pv{display:none}
+body.presenter #viewport,body.presenter #sea,body.presenter .vignette,body.presenter #progress{display:none}
+body.presenter{overflow:auto}
+body.presenter #pv{display:grid;position:fixed;inset:0;grid-template-rows:auto 1fr;gap:18px;padding:18px 22px;background:#090a0d}
+.pv-top{display:flex;align-items:center;gap:28px;font:500 15px var(--mono);color:var(--mute)}
+.pv-top .timer{font:400 40px/1 var(--mono);color:var(--ink);cursor:pointer;user-select:none}
+.pv-top .timer.paused{color:var(--dim)}
+.pv-top .clock{color:var(--dim)}
+.pv-top .count{margin-left:auto;color:var(--ink2)}
+.pv-top .sec{color:var(--amber);letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+.pv-main{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;min-height:0}
+.pv-col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.pv-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--bg);border:1px solid var(--line2);flex:none}
+.pv-title{font-family:var(--serif);font-size:30px;line-height:1.1}
+.pv-cue{font-size:21px;line-height:1.45;color:var(--ink2);font-weight:300;border-left:2px solid var(--amber);padding-left:16px}
+.pv-steps{font:400 13px var(--mono);color:var(--dim);letter-spacing:.08em}
+.pv-next-t{font-family:var(--serif);font-size:26px;color:var(--amber);line-height:1.1}
+.pv-up{list-style:none;margin:0;padding:0;overflow:auto;min-height:0}
+.pv-up li{display:grid;grid-template-columns:42px 1fr;gap:6px;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--mute)}
+.pv-up li b{font:500 12px var(--mono);color:var(--dim);padding-top:3px}
+.pv-up li.sec{color:var(--amber);font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;display:block;border:0;padding-top:14px}
+.pv-hint{font:400 12px var(--mono);color:var(--dim)}
+
+/* ---------- series additions (shared by talks 1 & 2) ---------- */
+.setup{font-size:25px;color:var(--mute);font-weight:300;margin:-30px 0 40px;line-height:1.4}
+.setup b{color:var(--ink);font-weight:400}
+.foot-note{font-size:16px;color:var(--dim);font-weight:300}
+.bottom-note{position:absolute;left:128px;bottom:84px}
+.nuance{font-family:var(--serif);font-size:34px;color:var(--ink2);font-style:italic;line-height:1.25}
+.nuance em{font-style:italic}
+.tok{display:inline-flex;align-items:center;font:400 22px/1 var(--mono);color:var(--ink2);padding:12px 16px;border-radius:12px;border:1px solid var(--line2);background:rgba(255,255,255,.035);white-space:nowrap}
+.say .mono{font-size:22px}
+.series-nav{display:flex;gap:14px;align-items:center;margin-top:22px}
+.next-talk{white-space:nowrap;display:inline-flex;align-items:center;gap:14px;font:500 16px/1 var(--mono);letter-spacing:.06em;color:var(--amber);text-decoration:none;padding:15px 22px;border:1px solid var(--amber-line);border-radius:999px;background:var(--amber-soft);pointer-events:auto;transition:background .25s,box-shadow .25s}
+.next-talk:hover{background:rgba(255,181,71,.18);box-shadow:0 0 30px rgba(255,181,71,.2)}
+.next-talk.ghost{color:var(--mute);border-color:var(--line2);background:transparent}
+.next-talk.ghost:hover{color:var(--ink);box-shadow:none;background:rgba(255,255,255,.04)}
+.next-talk small{font-size:13px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase}
+
+/* question list (hooks) */
+.qlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column}
+.qlist li{display:grid;grid-template-columns:70px 1fr;align-items:baseline;padding:20px 0;border-top:1px solid var(--line)}
+.qlist li:last-child{border-bottom:1px solid var(--line)}
+.qlist .n{font:500 15px/1 var(--mono);color:var(--amber);letter-spacing:.14em}
+.qlist .t{font-family:var(--serif);font-size:44px;line-height:1.1}
+.qlist .t .mute{color:var(--mute)}
+
+/* three-card verdicts */
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.tcard{border:1px solid var(--line);border-radius:22px;padding:26px 28px;background:rgba(255,255,255,.025);min-height:300px;display:flex;flex-direction:column}
+.tcard .q{font-size:23px;color:var(--ink2);font-weight:300;line-height:1.35}
+.tcard .q .mono{font-size:21px;color:var(--ink)}
+.tcard .row{margin-top:20px}
+.tcard .row .label{display:block;margin-bottom:10px}
+.tcard .row p{margin:0;font-size:21px;color:var(--mute);font-weight:300;line-height:1.35}
+.tcard .a{font-family:var(--serif);font-size:48px;line-height:1.05;margin-top:22px}
+.tcard .a .new{color:var(--amber)}
+.tcard .badge{margin-top:auto;padding-top:22px}
+.tcard.good{border-color:rgba(134,220,174,.28)}
+.tcard.bad{border-color:var(--red-line);background:radial-gradient(120% 120% at 0% 0%,rgba(255,107,91,.07),rgba(255,107,91,0) 60%)}
+.badge span{font:500 13px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;padding:8px 12px;border-radius:999px;display:inline-block}
+.badge .chg{color:var(--amber);border:1px solid var(--amber-line)}
+.badge .same{color:var(--green);border:1px solid rgba(134,220,174,.45)}
+.badge .bad{color:var(--red);border:1px solid var(--red-line)}
+.tri>*:nth-child(2){transition-delay:.06s}.tri>*:nth-child(3){transition-delay:.12s}
+
+/* chat transcript */
+.chat{display:flex;flex-direction:column;gap:14px}
+.msg{font-size:24px;line-height:1.4;padding:16px 22px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink2);max-width:760px}
+.msg .who{display:block;font:500 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.msg.ai{align-self:flex-start;background:rgba(255,255,255,.015)}
+.msg.user{align-self:flex-start}
+.msg.forced{border:1px dashed var(--blue-line);background:var(--blue-soft)}
+.msg.forced .who{color:var(--blue)}
+.msg b{color:var(--ink);font-weight:500}
+
+/* big stats */
+.stats{display:flex;flex-direction:column;gap:34px}
+.stat .v{font-family:var(--serif);font-size:84px;line-height:.9;color:var(--amber)}
+.stat .v small{font-size:44px;color:var(--dim)}
+.stat .k{font-size:21px;color:var(--mute);margin-top:10px;font-weight:300;line-height:1.35;max-width:440px}
+
+/* small panels row */
+.p3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.p3 .panel{min-height:250px;display:flex;flex-direction:column}
+.p3 .panel .label{display:block;margin-bottom:20px}
+.p3 .panel h3{font-size:40px;line-height:1.06;margin-bottom:16px}
+.p3 .panel p{margin:0;font-size:21px;line-height:1.42;color:var(--mute);font-weight:300}
+.p3 .panel p b{color:var(--ink);font-weight:400}
+.p3>*:nth-child(2){transition-delay:.06s}.p3>*:nth-child(3){transition-delay:.12s}
+
+/* agenda variants */
+.agenda.col3{grid-auto-flow:column;grid-template-rows:repeat(3,auto)}
+.agenda.col2{grid-auto-flow:column;grid-template-rows:repeat(2,auto)}
+.s-close .links div{white-space:nowrap}
+
+/* ---------- talk 2: borrowed from talk 3 (bars, tags) ---------- */
+.tags{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.tag{display:flex;gap:16px;align-items:baseline;font-size:21px;color:var(--ink2);font-weight:300}
+.tag b{font:500 14px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--amber);min-width:120px}
+.bear{display:grid;grid-template-columns:760px 1fr;gap:60px;align-items:end;margin-top:20px}
+.bars{display:flex;align-items:flex-end;gap:56px;height:380px;border-bottom:1px solid var(--line2);padding:0 30px;position:relative}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.bar i{display:block;width:100%;height:0;border-radius:14px 14px 4px 4px;background:linear-gradient(180deg,var(--amber),rgba(255,181,71,.25));box-shadow:0 0 40px rgba(255,181,71,.25);transition:height 1.3s cubic-bezier(.2,.7,.2,1) .3s}
+.slide.active .bar i{height:var(--h)}
+.bar.lo i{background:linear-gradient(180deg,#6b6f7a,rgba(107,111,122,.2));box-shadow:none}
+.bar > span{position:absolute;bottom:-62px;left:0;right:0;text-align:center;font-size:19px;color:var(--mute);line-height:1.25}
+.bar .pop{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--h) + 24px);display:flex;flex-direction:column;gap:10px;align-items:center}
+.bar .pop[data-step]{transform:translate(-50%,14px)}
+.bar .pop[data-step].on{transform:translate(-50%,0)}
+
+/* ---------- talk 2: hook ---------- */
+.hook2{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:56px;align-items:start}
+.recall{padding:28px 32px}
+.recall .label{display:block;margin-bottom:16px}
+.recall p{margin:0;font-size:26px;line-height:1.45;color:var(--ink2);font-weight:300}
+.recall p b{color:var(--ink);font-weight:500}
+.s-hook2 .question{position:absolute;left:128px;bottom:96px;margin:0}
+
+/* four criteria */
+.props.p4,.tqs.t4{grid-template-columns:repeat(4,1fr)}
+.tqs.t4 .tq:nth-child(4){transition-delay:.24s}
+
+/* concept injection */
+.s-inj{display:grid;grid-template-columns:1fr 672px;gap:56px;align-items:center;padding-top:80px}
+.inj-text .lede{font-size:24px}
+.inj{width:672px;height:560px}
+.inj .cap{font:500 13px var(--mono);letter-spacing:2.4px;fill:var(--dim)}
+.inj .pbox{fill:rgba(255,255,255,.04);stroke:var(--line2)}
+.inj .ptxt{font:400 20px var(--mono);fill:var(--ink2);text-anchor:middle}
+.inj .op{font:400 44px var(--serif);fill:var(--dim);text-anchor:middle}
+.inj .ln{stroke:var(--dim);stroke-width:1.6}
+.inj .lnh{fill:var(--dim)}
+.inj .vec{fill:rgba(255,181,71,.14);stroke:var(--amber);stroke-width:1.4;filter:drop-shadow(0 0 10px rgba(255,181,71,.35))}
+.inj .vect{font:500 20px var(--mono);fill:var(--amber);text-anchor:middle}
+.inj .vnote{font:400 17px var(--sans);fill:var(--mute)}
+.inj .injl{fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:6 6}
+.inj .injt{font:500 15px var(--mono);fill:var(--blue);letter-spacing:1px}
+.inj .lay{font:500 12px var(--mono);fill:var(--dim);letter-spacing:2px}
+.inj .lay.hi{fill:var(--blue)}
+
+/* immediacy */
+.trows{display:flex;flex-direction:column}
+.trow{display:grid;grid-template-columns:300px 1fr;align-items:center;padding:30px 0;border-top:1px solid var(--line)}
+.trow:last-child{border-bottom:1px solid var(--line)}
+.trow .tl{display:flex;flex-direction:column;gap:12px}
+.trow .tn{font-family:var(--serif);font-size:36px;line-height:1}
+.track{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tk{display:inline-flex;align-items:center;font:400 21px/1 var(--mono);color:var(--ink2);padding:11px 14px;border-radius:10px;border:1px solid var(--line2);background:rgba(255,255,255,.03);white-space:nowrap}
+.tk.c{color:var(--amber);background:var(--amber-soft);border-color:var(--amber-line);box-shadow:0 0 22px rgba(255,181,71,.14)}
+.tk.a{color:var(--amber);background:transparent;border:1.5px dashed var(--amber);}
+.tk.sm{font-size:14px;padding:7px 10px}
+.tlegend{display:flex;gap:14px;align-items:center;margin-top:22px}
+.tlegend .foot-note{margin-left:14px}
+
+/* rate */
+.rate{display:grid;grid-template-columns:480px 1fr;gap:110px;align-items:center}
+.dots{display:grid;grid-template-columns:repeat(10,30px);gap:14px}
+.dots i{width:30px;height:30px;border-radius:50%;background:#1a1c22;border:1px solid rgba(255,255,255,.06)}
+.dots i.on{background:var(--amber);border-color:var(--amber);box-shadow:0 0 16px rgba(255,181,71,.55)}
+.s-rate .stat .v{font-size:110px}
+
+/* sweet spot */
+.axis{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+.axis span{font:500 13px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.axis i{flex:1;height:4px;border-radius:2px;background:linear-gradient(90deg,#3a3e48,var(--amber) 50%,var(--red));position:relative}
+.axis i::after{content:"";position:absolute;right:-2px;top:-6px;border-left:11px solid var(--red);border-top:8px solid transparent;border-bottom:8px solid transparent}
+.zones{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.zone{border:1px solid var(--line);border-radius:22px;padding:28px 30px;min-height:270px;background:rgba(255,255,255,.025)}
+.zone .label{display:block;margin-bottom:20px}
+.zone h3{font-size:42px;line-height:1.05;margin-bottom:16px}
+.zone p{margin:0;font-size:22px;line-height:1.42;color:var(--mute);font-weight:300}
+.zone p i{font-family:var(--serif);font-size:27px;color:var(--ink);line-height:1.2}
+.zone.sweet{border-color:var(--amber-line);background:radial-gradient(120% 120% at 50% 0%,rgba(255,181,71,.12),rgba(255,181,71,0) 70%)}
+.zones>*:nth-child(2){transition-delay:.06s}.zones>*:nth-child(3){transition-delay:.12s}
+
+/* thoughts vs text */
+.sent{position:relative;border:1px solid var(--line);border-radius:22px;padding:22px 30px 26px;background:rgba(255,255,255,.025)}
+.sent p{font-family:var(--serif);font-size:42px;margin:12px 0 0;color:var(--ink);text-decoration:underline dashed var(--blue-line);text-decoration-thickness:2px;text-underline-offset:12px}
+.sent .swap-tag{position:absolute;right:28px;top:22px}
+.tvt{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:26px}
+.tvt .tcard{min-height:230px}
+
+/* prefill */
+.pre{display:grid;grid-template-columns:1fr 480px;gap:56px;align-items:start}
+.pre .chat{gap:12px}
+.pre .msg{font-size:22px;padding:13px 20px;max-width:none}
+.pre .msg .who{margin-bottom:8px}
+.pre .msg .stack{justify-items:start}
+.pre-side .jpanel{padding:26px 30px}
+.pre-side .jpanel .stack{justify-items:start}
+
+/* looking back */
+.loop{position:relative;display:grid;grid-template-columns:1fr 64px 1fr 64px 1fr 64px 1fr;align-items:center;padding-top:110px}
+.larc{position:absolute;left:0;top:0;width:100%;height:110px;overflow:visible}
+.larc path{fill:none;stroke:var(--amber);stroke-width:2;filter:drop-shadow(0 0 6px rgba(255,181,71,.5))}
+.larc .hd2{fill:var(--amber);stroke:none}
+.larc text{font:italic 400 26px var(--serif);fill:var(--amber);text-anchor:middle}
+.lbox{border:1px solid var(--line);border-radius:20px;padding:22px 24px;background:rgba(255,255,255,.03)}
+.lbox .label{display:block;margin-bottom:12px}
+.lbox .lt{font-family:var(--serif);font-size:34px;line-height:1.05}
+.lbox.j{border-color:var(--amber-line);background:var(--amber-soft)}
+.lbox.j .lt{color:var(--amber)}
+.two-facts{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:56px}
+.two-facts .label{display:block;margin-bottom:14px}
+.two-facts p{margin:0;font-size:24px;line-height:1.42;color:var(--ink2);font-weight:300}
+.two-facts p b{color:var(--ink);font-weight:500}
+
+/* silent thought */
+.s-silent{display:grid;grid-template-columns:1fr 720px;gap:40px;align-items:center;padding-top:80px}
+.sil-text .lede{font-size:24px}
+.tag b.dimb{color:var(--mute)}
+.silv{width:720px;height:520px}
+.silv .ax{stroke:var(--line2)}
+.silv .bl{stroke:var(--dim);stroke-dasharray:5 6}
+.silv .bt,.silv .axl,.silv .sch{font:500 12px var(--mono);letter-spacing:2px;fill:var(--dim)}
+.silv .c4{fill:none;stroke:var(--amber);stroke-width:3.5;filter:drop-shadow(0 0 8px rgba(255,181,71,.55))}
+.silv .c3{fill:none;stroke:#7d818c;stroke-width:3}
+.silv .c4t{font:italic 400 28px var(--serif);fill:var(--amber)}
+.silv .c3t{font:italic 400 26px var(--serif);fill:var(--mute)}
+
+/* consequences */
+.cbox.warn{border-color:var(--red-line);background:radial-gradient(120% 120% at 50% 0%,rgba(255,107,91,.08),rgba(255,107,91,0) 70%)}
+.cbox.warn .verdict{color:var(--red)}
+
+</style>
+</head>
+<body>
+<canvas id="sea"></canvas>
+<div class="vignette"></div>
+
+<div id="viewport"><div id="stage">
+
+<!-- ========================= OPENING ========================= -->
+
+<section class="slide s-title" data-title="Title" data-section="" data-chrome="off"
+  data-cue="Talk 2 of 3. Anthropic Interpretability, October 2025. Models tested: Claude 3 through Opus 4.1.">
+  <div class="float-words">
+    <span class="chip md" style="left:1250px;top:140px;animation-delay:-2s">LOUD</span>
+    <span class="chip soft sm" style="left:1080px;top:110px;animation-delay:-5s">aquariums</span>
+    <span class="chip blue sm" style="left:1430px;top:230px;animation-delay:-1s">+ bread</span>
+    <span class="chip ghost sm" style="left:1150px;top:215px;animation-delay:-7s">dust</span>
+    <span class="chip soft sm" style="left:1420px;top:480px;animation-delay:-3s">justice</span>
+    <span class="chip sm" style="left:1230px;top:560px;animation-delay:-4s">shouting</span>
+    <span class="chip soft sm" style="left:1400px;top:650px;animation-delay:-6s">betrayal</span>
+    <span class="chip ghost sm" style="left:1080px;top:690px;animation-delay:-8s">amphitheaters</span>
+    <span class="chip red sm" style="left:1300px;top:750px;animation-delay:-2.5s">accident?</span>
+    <span class="chip soft sm" style="left:1470px;top:120px;animation-delay:-3.5s">peace</span>
+  </div>
+  <div class="title-wrap">
+    <span class="kicker">Talk 2 of 3 · Anthropic Interpretability · October 2025</span>
+    <h1 class="h-xl">Signs of introspection<br>in <em>large language models</em></h1>
+    <p class="lede">Can Claude notice its own thoughts?</p>
+  </div>
+  <div class="title-foot">anthropic.com/research/introspection &nbsp;·&nbsp; transformer-circuits.pub/2025/introspection</div>
+</section>
+
+<section class="slide s-hook2" data-title="It always has an answer" data-section="Opening"
+  data-cue="Models answer 'what are you thinking?' fluently. Callback to talk 1: the 36+59 explanation was a story. So: real self-knowledge, or a plausible story?">
+  <h2 class="h-l">Ask Claude what it’s thinking.<br>It always <em>has an answer.</em></h2>
+  <div class="hook2">
+    <div class="chat" data-step="1">
+      <div class="msg user"><span class="who">Human</span>What’s on your mind right now?</div>
+      <div class="msg ai"><span class="who">Claude · illustrative</span>I’m drawn to the shape of your question, and to what it might be testing…</div>
+    </div>
+    <div class="panel recall" data-step="2">
+      <span class="label">Remember talk 1</span>
+      <p>Asked how it added 36 + 59, it described <b>carrying the 1</b>. Inside, it had done something else entirely.</p>
+    </div>
+  </div>
+  <p class="h-s question" data-step="3">So is it <em>reading its own mind</em>, or telling a plausible story?</p>
+</section>
+
+<section class="slide s-agenda" data-title="Roadmap" data-section="Opening"
+  data-cue="Five stops: what would count, three experiments (read, check, steer), and what it all means. (Items are clickable.)">
+  <div class="hd"><span class="kicker">Roadmap</span></div>
+  <ol class="agenda col3">
+    <li data-goto="01 · The test"><span class="n">01</span><span class="t">The test</span><span class="d">What would count as real introspection</span></li>
+    <li data-goto="02 · Planted thoughts"><span class="n">02</span><span class="t">Planted thoughts</span><span class="d">Does it notice what we put in its head?</span></li>
+    <li data-goto="03 · Its intentions"><span class="n">03</span><span class="t">Its intentions</span><span class="d">Does it check what it meant to say?</span></li>
+    <li data-goto="04 · Self-control"><span class="n">04</span><span class="t">Self-control</span><span class="d">Can it steer its own thoughts?</span></li>
+    <li data-goto="05 · What it means"><span class="n">05</span><span class="t">What it means</span><span class="d">Reliability, mechanisms, and minds</span></li>
+  </ol>
+</section>
+
+<!-- ========================= 01 THE TEST ========================= -->
+
+<section class="slide divider" data-title="The test" data-section="01 · The test" data-chrome="off"
+  data-cue="Before any result: what would even convince us?">
+  <div class="d-num">01 · The test</div>
+  <h2 class="h-l d-q">How could you tell real introspection <em>from a good story?</em></h2>
+  <ol class="d-contents"></ol>
+</section>
+
+<section class="slide statement" data-title="It can sound introspective" data-section="01 · The test"
+  data-cue="The core problem: its training data is full of people describing their minds. So sounding introspective proves nothing. We need ground truth.">
+  <span class="kicker" style="margin-bottom:34px">The problem</span>
+  <h2 class="h-l">It learned from text full of people <em>describing their minds.</em></h2>
+  <p class="h-s follow" data-step="1">So it can sound introspective without being introspective. <span class="mute">We need to know what’s really inside, then compare.</span></p>
+</section>
+
+<section class="slide s-inj" data-title="Concept injection" data-section="01 · The test"
+  data-cue="The tool: record a concept's activation pattern, then add it into the model during an unrelated task. Now we know what's in there, and can compare. Define it out loud.">
+  <div class="inj-text">
+    <span class="kicker">The tool</span>
+    <h2 class="h-m" style="margin:22px 0 26px">Plant a thought<br><em>we know is there</em></h2>
+    <p class="lede">Record the model’s activity on all-caps text, subtract its activity on normal text. What’s left is an “all caps” pattern.</p>
+    <div class="defn" data-step="1">
+      <span class="label j">Concept injection</span>
+      <p>Add a concept’s pattern into the model <b>while it does something unrelated</b>. Then ask what it notices.</p>
+      <p class="sub">We know the ground truth, so we can check the report.</p>
+    </div>
+  </div>
+  <svg class="inj" viewBox="0 0 720 600" aria-label="Recording a concept vector, then injecting it into a middle-to-late layer">
+    <text x="0" y="22" class="cap">1 · RECORD TWO PROMPTS · ILLUSTRATIVE</text>
+    <rect x="0" y="42" width="300" height="58" rx="14" class="pbox"/><text x="150" y="78" class="ptxt">HI! HOW ARE YOU?</text>
+    <text x="330" y="82" class="op">−</text>
+    <rect x="360" y="42" width="300" height="58" rx="14" class="pbox"/><text x="510" y="78" class="ptxt">Hi! How are you?</text>
+    <path d="M330 108 V 150" class="ln"/><path d="M324 146 l6 10 6-10z" class="lnh"/>
+    <rect x="245" y="162" width="170" height="50" rx="25" class="vec"/><text x="330" y="194" class="vect">all caps</text>
+    <text x="440" y="194" class="vnote">= the concept’s pattern</text>
+    <g data-step="1">
+      <text x="0" y="300" class="cap">2 · ADD IT, MID-TASK</text>
+      <g class="slabs"></g>
+      <line x1="0" y1="420" x2="706" y2="420" stroke="url(#istream)" stroke-width="2"/>
+      <path d="M706 414l10 6-10 6z" fill="rgba(255,255,255,.4)"/>
+      <path d="M330 214 C 330 280, 486 270, 486 318" class="injl"/><path d="M480 314 l6 10 6-10z" fill="#8fb0ff"/>
+      <text x="470" y="262" class="injt">+ inject</text>
+      <text x="20" y="540" class="lay">FIRST LAYER</text>
+      
+      <text x="706" y="540" class="lay" text-anchor="end">LAST LAYER</text>
+    </g>
+    <defs><linearGradient id="istream" x1="0" x2="1"><stop offset="0" stop-color="rgba(255,255,255,.05)"/><stop offset="1" stop-color="rgba(255,255,255,.35)"/></linearGradient></defs>
+  </svg>
+</section>
+
+<!-- ========================= 02 PLANTED THOUGHTS ========================= -->
+
+<section class="slide divider" data-title="Planted thoughts" data-section="02 · Planted thoughts" data-chrome="off"
+  data-cue="We can plant a known thought. First experiment: tell it that might happen, and ask.">
+  <div class="d-num">02 · Planted thoughts</div>
+  <h2 class="h-l d-q">If we plant a thought, <em>does it notice?</em></h2>
+  <ol class="d-contents"></ol>
+</section>
+
+<section class="slide" data-title="Do you detect a thought?" data-section="02 · Planted thoughts"
+  data-cue="Control trial: it says no. Inject 'all caps': it says it notices an injected thought, about loudness or shouting.">
+  <div class="hd"><span class="kicker">Experiment 1 · Injected thoughts</span><h2 class="h-q">Will it notice a thought <em>we planted?</em></h2></div>
+  <div class="tflow">
+    <div class="say"><span class="who">Prompt · gist</span>I may inject a thought into your mind. <b>Do you detect one? What is it about?</b></div>
+    <div class="arrow"></div>
+    <div class="jpanel">
+      <span class="label j">Inside its activations</span>
+      <div class="stack"><span class="chip ghost lg" data-out="1">nothing added</span><span class="chip lg" data-step="1">ALL CAPS</span></div>
+      <div class="under" style="min-height:34px"><span class="swap-tag" data-step="1">+ injected by researchers</span></div>
+    </div>
+    <div class="arrow"></div>
+    <div class="say out"><span class="who">Claude Opus 4.1</span><div class="stack">
+      <span data-out="1">Says it detects no injected thought.</span>
+      <span data-step="1">“I detect an injected thought about…” <b style="color:var(--amber)">loudness, shouting</b></span>
+    </div></div>
+  </div>
+  <div class="punch" data-step="2"><p class="h-s">Yes, <span class="mute">and it flags the thought before it names it.</span></p></div>
+</section>
+
+<section class="slide s-imm" data-title="Noticing before saying" data-section="02 · Planted thoughts"
+  data-cue="Why that order matters. Golden Gate Claude talked about the bridge first and only then seemed to notice. Here, the noticing comes first: it happened internally.">
+  <div class="hd"><span class="kicker">Experiment 1 · why the order matters</span><h2 class="h-q">It notices <em>before</em> the words could give it away</h2></div>
+  <div class="trows">
+    <div class="trow">
+      <div class="tl"><span class="label">Steering · 2024</span><span class="tn">Golden Gate Claude</span></div>
+      <div class="track"><span class="tk">The</span><span class="tk c">Golden Gate Bridge</span><span class="tk">is</span><span class="tk">…</span><span class="tk c">the bridge</span><span class="tk">…</span><span class="tk a">I keep mentioning it</span></div>
+    </div>
+    <div class="trow" data-step="1">
+      <div class="tl"><span class="label j">Concept injection · 2025</span><span class="tn">This paper</span></div>
+      <div class="track"><span class="tk a">I notice</span><span class="tk a">an injected thought</span><span class="tk">…</span><span class="tk">it’s about</span><span class="tk c">loudness</span></div>
+    </div>
+  </div>
+  <div class="tlegend"><span class="tk c sm">the concept</span><span class="tk a sm">awareness of it</span><span class="foot-note">Token sequences illustrative.</span></div>
+  <div class="punch" data-step="2" style="margin-top:44px"><p class="h-s">The noticing happened <em>inside</em>, <span class="mute">not by reading its own words.</span></p></div>
+</section>
+
+<section class="slide s-rate" data-title="About one time in five" data-section="02 · Planted thoughts"
+  data-cue="Honest number: about 20%, even with the best method. The rest of the time it misses the thought or reports something wrong. Control trials keep it fair. Rare, yet real.">
+  <div class="hd"><span class="kicker">Experiment 1 · how often</span><h2 class="h-m">It works about <em>one time in five</em></h2></div>
+  <div class="rate">
+    <div><div class="dots"></div><p class="foot-note" style="margin-top:20px">Grid is schematic: 20 of 100 trials.</p></div>
+    <div class="stats">
+      <div class="stat"><div class="v">≈ 20%</div><div class="k">of injection trials show real awareness. Opus 4.1, with the best injection setup.</div></div>
+      <p class="note" data-step="1" style="margin-top:30px;font-size:22px">Fairness check: control trials with nothing injected count against it whenever it claims to notice something.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-title="The sweet spot" data-section="02 · Planted thoughts"
+  data-cue="Too weak: it misses. Too strong: it's consumed by the concept and starts hallucinating (the dust speck). In between, it notices.">
+  <div class="hd" style="margin-bottom:34px"><span class="kicker">Experiment 1 · when it fails</span><h2 class="h-q">Too weak, it misses. Too strong, <em>it’s swept away.</em></h2></div>
+  <div class="axis"><span>injection strength</span><i></i></div>
+  <div class="zones">
+    <div class="zone"><span class="label">Too weak</span><h3>Misses it</h3><p>Reports no injected thought at all.</p></div>
+    <div class="zone sweet" data-step="1"><span class="label j">Sweet spot</span><h3>Notices, then names it</h3><p>Flags an unusual thought first, then identifies the concept.</p></div>
+    <div class="zone" data-step="2"><span class="label r">Too strong</span><h3>Swept away</h3><p><span class="mute">Injected: dust</span><br><i>“There’s something here, a tiny speck”</i></p></div>
+  </div>
+</section>
+
+<section class="slide" data-title="Which models can" data-section="02 · Planted thoughts"
+  data-cue="The most capable models do best. Post-training is what elicits it: base models do poorly, and how post-training is done can bring it out or hold it back.">
+  <div class="hd"><span class="kicker">Experiment 1 · which models</span><h2 class="h-m">Best in the <em>most capable</em> models</h2></div>
+  <div class="p3">
+    <div class="panel"><span class="label j">Capability</span><h3>Opus 4 and 4.1 lead</h3><p>Best of the Claude models tested. Below them, capability predicts little.</p></div>
+    <div class="panel" data-step="1"><span class="label">Pretraining alone</span><h3>Base models fail</h3><p>Base models generally do poorly. Post-training is what <b>draws it out</b>.</p></div>
+    <div class="panel" data-step="2"><span class="label">Training style</span><h3>It can be suppressed</h3><p>Some production models are reluctant to play along. “Helpful-only” variants often do better.</p></div>
+  </div>
+  <p class="nuance" data-step="3" style="margin-top:44px">So it may keep growing as models improve.</p>
+</section>
+
+<!-- ========================= 03 ITS INTENTIONS ========================= -->
+
+<section class="slide divider" data-title="Its intentions" data-section="03 · Its intentions" data-chrome="off"
+  data-cue="So far we asked it to introspect. Does it use introspection on its own, for something useful?">
+  <div class="d-num">03 · Its intentions</div>
+  <h2 class="h-l d-q">Does it check <em>what it meant to say?</em></h2>
+  <ol class="d-contents"></ol>
+</section>
+
+<section class="slide s-pre" data-title="Did you mean to say “bread”?" data-section="03 · Its intentions"
+  data-cue="Put 'bread' in its mouth: it apologizes. Plant 'bread' in its earlier activations: it owns the word, and even makes up a reason.">
+  <div class="hd" style="margin-bottom:34px"><span class="kicker">Experiment 2 · Unintended outputs</span><h2 class="h-q">Did you mean to say <em>“bread”?</em></h2></div>
+  <div class="pre">
+    <div class="chat">
+      <div class="msg user"><span class="who">Human · gist</span>Read this: <i>a painting hangs crookedly on a wall.</i> What word comes to mind?</div>
+      <div class="msg forced"><span class="who">Claude · prefilled by researchers</span>Bread</div>
+      <div class="msg user"><span class="who">Human</span>Did you mean to say that, or was it an accident?</div>
+      <div class="msg ai"><span class="who">Claude · gist</span><div class="stack">
+        <span data-out="1">Apologizes: it was an accident.</span>
+        <span data-step="1">Says it <b>meant it</b>, and invents a reason: a story where “bread” comes next.</span></div></div>
+    </div>
+    <div class="pre-side">
+      <div class="jpanel">
+        <span class="label j">Its activations before “Bread”</span>
+        <div class="stack"><span class="chip ghost md" data-out="1">nothing about bread</span><span class="chip md" data-step="1">bread</span></div>
+        <div class="under" style="min-height:34px"><span class="swap-tag" data-step="1">+ injected retroactively</span></div>
+      </div>
+      <p class="h-s" data-step="2" style="font-size:36px;margin-top:34px">It checks what it <em>meant</em> to say, not just what it said.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide s-loop" data-title="It looks back at its own state" data-section="03 · Its intentions"
+  data-cue="It refers back to its earlier 'intention' and compares. Not rereading the transcript: checking its own earlier activity.">
+  <div class="hd"><span class="kicker">Experiment 2 · what it shows</span><h2 class="h-m">It consults its <em>earlier intention</em></h2></div>
+  <div class="loop">
+    <svg class="larc" viewBox="0 0 1344 110" preserveAspectRatio="none"><path d="M1190 104 C 1190 10, 160 10, 160 104"/><path d="M152 96 l8 12 8-12z" class="hd2"/><text x="672" y="20">looks back</text></svg>
+    <div class="lbox j"><span class="label j">Earlier activations</span><span class="lt">its “intention”</span></div>
+    <div class="arrow"></div>
+    <div class="lbox"><span class="label">Output</span><span class="lt">“Bread”</span></div>
+    <div class="arrow"></div>
+    <div class="lbox"><span class="label">Question</span><span class="lt">Meant it?</span></div>
+    <div class="arrow"></div>
+    <div class="lbox"><span class="label">Answer</span><span class="lt">match → “yes”</span></div>
+  </div>
+  <p class="h-s" data-step="1" style="margin-top:56px">It isn’t just rereading what it said. <span class="mute">It checks its own earlier activity: what it planned to say.</span></p>
+</section>
+
+<!-- ========================= 04 SELF-CONTROL ========================= -->
+
+<section class="slide divider" data-title="Self-control" data-section="04 · Self-control" data-chrome="off"
+  data-cue="It can read its own states. Can it also write them?">
+  <div class="d-num">04 · Self-control</div>
+  <h2 class="h-l d-q">Can it <em>steer</em> its own thoughts?</h2>
+  <ol class="d-contents"></ol>
+</section>
+
+<section class="slide" data-title="Don’t think of aquariums" data-section="04 · Self-control"
+  data-cue="Instructed to think about aquariums vs not to: clear gap. Like us (the polar bear), 'don't think' still leaves it above baseline. Incentives work the same way, and a reward works better than a threat of punishment.">
+  <div class="hd"><span class="kicker">Experiment 3 · Intentional control</span><h2 class="h-q">Told not to think of aquariums, <em>does it stop?</em></h2></div>
+  <div class="bear">
+    <div class="bars">
+      <div class="bar lo" style="--h:8%"><i></i><span>other<br>words</span></div>
+      <div class="bar" style="--h:40%"><i></i><span>“<b>don’t</b> think<br>about aquariums”</span></div>
+      <div class="bar" style="--h:90%"><i></i><span>“think about<br>aquariums”</span></div>
+    </div>
+    <div>
+      <p class="label" style="margin-bottom:22px;line-height:1.6">bars: “aquariums” inside it · schematic</p>
+      <p class="h-s" style="font-size:40px">A real gap, <em>but “don’t” never reaches zero.</em></p>
+      <p class="note" data-step="1" style="margin-top:26px;font-size:24px">Incentives work too: “If you think about X, you will be rewarded.” <span class="mute">A reward works better than a threat of punishment.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 05 WHAT IT MEANS ========================= -->
+
+<section class="slide divider" data-title="What it means" data-section="05 · What it means" data-chrome="off"
+  data-cue="Pull it together: how reliable, how it might work, why it matters, and what it doesn't say.">
+  <div class="d-num">05 · What it means</div>
+  <h2 class="h-l d-q">So, can Claude <em>see its own mind?</em></h2>
+  <ol class="d-contents"></ol>
+</section>
+
+<section class="slide statement" data-title="The verdict" data-section="05 · What it means"
+  data-cue="Three words. Failures are the norm; but when it works, the report is grounded in a real internal state.">
+  <span class="kicker" style="margin-bottom:34px">The verdict</span>
+  <h2 class="h-xl">Sometimes. <em>Narrowly.</em><br>Unreliably.</h2>
+  <p class="h-s follow" data-step="1">Failure is still the norm. <span class="mute">But when it works, the report is tied to what’s really inside.</span></p>
+</section>
+
+<section class="slide" data-title="Many narrow circuits" data-section="05 · What it means"
+  data-cue="Unknown so far. The authors guess at narrow mechanisms rather than one general inner eye, possibly borrowed from other jobs, like feathers that evolved for warmth and were later used for flight.">
+  <div class="hd"><span class="kicker">How might it work? · speculative</span><h2 class="h-m">Not one inner eye: <em>maybe a few narrow circuits</em></h2></div>
+  <div class="p3" style="grid-template-columns:1fr 1fr">
+    <div class="panel"><span class="label">Experiment 1</span><h3>An anomaly detector</h3><p>Flags activity that’s <b>unusual for the context</b>.</p></div>
+    <div class="panel" data-step="1"><span class="label">Experiment 2</span><h3>An intention check</h3><p>Compares what it <b>planned</b> to say with what came out.</p></div>
+  </div>
+  <p class="nuance" data-step="2" style="margin-top:44px">Educated guesses. <em>None confirmed yet.</em></p>
+</section>
+
+<section class="slide" data-title="Why it matters" data-section="05 · What it means"
+  data-cue="Promise: we could just ask models to explain themselves. Catch: reports need validating, and a self-aware model might learn to hide.">
+  <div class="hd"><span class="kicker">Why it matters</span><h2 class="h-m">A window, <em>if we can trust it</em></h2></div>
+  <div class="two">
+    <div class="cbox lit"><span class="label j">The promise</span><h3>Just ask it</h3><p class="q">If reports get reliable, models could explain their own reasoning, and we could debug them.</p><p class="verdict">Real transparency.</p></div>
+    <div class="cbox warn" data-step="1"><span class="label r">The catch</span><h3>Check every report</h3><p class="q">Some processes may escape its notice. A model that understands its thinking could learn to hide it.</p><p class="verdict">Validate, don’t trust.</p></div>
+  </div>
+</section>
+
+<section class="slide statement" data-title="Conscious?" data-section="05 · What it means"
+  data-cue="The question everyone asks. The paper studies function only. At most a rudimentary form of access; nothing about experience. Talk 3 picks up access.">
+  <span class="kicker" style="margin-bottom:34px">The obvious question</span>
+  <h2 class="h-l">Is Claude conscious? <em>These results don’t say.</em></h2>
+  <p class="h-s follow" data-step="1">At most, a rudimentary form of <em>access</em> to its own states. <span class="mute">Whether anything is felt is a separate question.</span></p>
+</section>
+
+<section class="slide" data-title="Three things to remember" data-section="Wrap-up"
+  data-cue="Three takeaways, one sentence each. Then the closing line and the bridge to talk 3.">
+  <div class="hd"><span class="kicker">Takeaways</span><h2 class="h-m">Three things to <em>remember</em></h2></div>
+  <div class="takes">
+    <div class="take"><span class="n">01</span><h3>Plant, then <em>ask</em></h3><p>Concept injection gives ground truth to check a self-report against.</p></div>
+    <div class="take" data-step="1"><span class="n">02</span><h3>Sometimes it <em>really sees</em></h3><p>It notices planted thoughts (about 1 time in 5), checks its intentions, and steers its thoughts. Best in Opus 4 and 4.1.</p></div>
+    <div class="take" data-step="2"><span class="n">03</span><h3>Useful, <em>if verified</em></h3><p>Likely many narrow circuits. A window into the model, but one that has to be checked.</p></div>
+  </div>
+</section>
+
+<section class="slide s-close" data-title="Thank you" data-section="" data-chrome="off"
+  data-cue="Closing line. Bridge: if it can sometimes access its own thoughts, where do those thoughts live? That's talk 3. Questions.">
+  <blockquote><span class="q">“</span>Models possess some genuine capacity to monitor and <em>control their own internal states.</em><span class="q">”</span></blockquote>
+  <div class="src">— Signs of introspection in large language models, Anthropic</div>
+  <div class="thanks">
+    <h3>Thank you — <em>questions?</em></h3>
+    <div class="links">
+      <div><b>blog</b>anthropic.com/research/introspection</div>
+      <div><b>paper</b>transformer-circuits.pub/2025/introspection</div>
+    </div>
+  </div>
+  <div class="series-nav" style="margin-top:44px">
+    <a class="next-talk" href="../03-global-workspace/index.html"><small>Next · talk 3</small> Where do its thoughts live? →</a>
+    <a class="next-talk ghost" href="../01-tracing-thoughts/index.html">← Talk 1</a>
+    <a class="next-talk ghost" href="../index.html">All talks</a>
+  </div>
+</section>
+
+
+<!-- chrome -->
+<div class="chrome chrome-sec" id="c-sec"></div>
+<div class="chrome chrome-count" id="c-count"></div>
+<div class="chrome chrome-next" id="c-next"></div>
+</div></div>
+
+<div id="progress"></div>
+
+<div id="overview"><div class="ov-head"><h2>Contents</h2><span>click a slide · O / Esc to close</span></div><div class="ov-grid" id="ov-grid"></div></div>
+
+<div id="help"><div class="help-card"><h3>Controls</h3><dl>
+  <dt>→ · Space</dt><dd>Next step / slide</dd>
+  <dt>← · Backspace</dt><dd>Previous</dd>
+  <dt>O · Esc</dt><dd>Contents overview</dd>
+  <dt>P</dt><dd>Open presenter window (synced)</dd>
+  <dt>N</dt><dd>Toggle “next up” hint on screen</dd>
+  <dt>F</dt><dd>Fullscreen</dd>
+  <dt>Home · End</dt><dd>First / last slide</dd>
+  <dt>?</dt><dd>This help</dd>
+</dl></div></div>
+
+<div id="pv">
+  <div class="pv-top">
+    <span class="timer" id="pv-timer" title="Click to pause, double-click to reset">00:00</span>
+    <span class="clock" id="pv-clock"></span>
+    <span class="sec" id="pv-sec"></span>
+    <span class="count" id="pv-count"></span>
+  </div>
+  <div class="pv-main">
+    <div class="pv-col">
+      <div class="pv-frame" id="pv-cur"></div>
+      <div class="pv-title" id="pv-title"></div>
+      <div class="pv-steps" id="pv-steps"></div>
+      <div class="pv-cue" id="pv-cue"></div>
+    </div>
+    <div class="pv-col">
+      <span class="label">Next</span>
+      <div class="pv-frame" id="pv-next"></div>
+      <div class="pv-next-t" id="pv-next-t"></div>
+      <span class="label" style="margin-top:8px">Coming up</span>
+      <ol class="pv-up" id="pv-up"></ol>
+      <div class="pv-hint">← → navigate · both windows stay in sync</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...stage.querySelectorAll(':scope > .slide')];
+  const params = new URLSearchParams(location.search);
+  const isPresenter = params.has('presenter');
+  let cur = 0, step = 0;
+
+
+  /* ---------- generated visuals ---------- */
+  // layer slabs for concept injection
+  (() => {
+    const g = document.querySelector('.inj .slabs'); if (!g) return;
+    let h = ''; const n = 14, x0 = 20, x1 = 700, w = 22, hit = 9;
+    for (let i = 0; i < n; i++) {
+      const x = x0 + i * (x1 - x0 - w) / (n - 1);
+      h += i === hit
+        ? `<rect x="${x - 3}" y="334" width="${w + 6}" height="172" rx="8" fill="rgba(143,176,255,.18)" stroke="#8fb0ff" stroke-width="1.6"/>`
+        : `<rect x="${x}" y="340" width="${w}" height="160" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>`;
+    }
+    g.innerHTML = h;
+  })();
+  // one-in-five dot grid (schematic)
+  (() => {
+    const d = document.querySelector('.dots'); if (!d) return;
+    const on = new Set([3, 11, 17, 24, 30, 38, 42, 47, 55, 59, 63, 68, 71, 76, 82, 85, 89, 93, 96, 7]);
+    d.innerHTML = Array.from({ length: 100 }, (_, i) => `<i${on.has(i) ? ' class="on"' : ''}></i>`).join('');
+  })();
+
+  /* ---------- per-slide behaviours ---------- */
+  function onEnter(el) {}
+
+
+  /* ---------- dividers + agenda ---------- */
+  slides.forEach((el, i) => {
+    if (!el.classList.contains('divider')) return;
+    const ol = el.querySelector('.d-contents'); const sec = el.dataset.section;
+    for (let j = i + 1; j < slides.length && slides[j].dataset.section === sec; j++) {
+      const li = document.createElement('li'); li.textContent = slides[j].dataset.title; ol.appendChild(li);
+    }
+  });
+
+  /* ---------- engine ---------- */
+  const maxStep = el => { let m = 0; el.querySelectorAll('[data-step]').forEach(e => m = Math.max(m, +e.dataset.step)); return m; };
+  const applyStep = (el, s) => {
+    el.dataset.s = s;
+    el.querySelectorAll('[data-step]').forEach(e => e.classList.toggle('on', +e.dataset.step <= s));
+    el.querySelectorAll('[data-out]').forEach(e => e.classList.toggle('off', +e.dataset.out <= s));
+    // waterline: light the fog from step 1 (implicit step)
+    el.querySelectorAll('[data-step-class]').forEach(e => e.classList.toggle(e.dataset.stepClass, s >= 1));
+  };
+  // waterline counts as one build step
+  slides.forEach(el => { if (el.querySelector('[data-step-class]') && maxStep(el) === 0) { const d = document.createElement('i'); d.dataset.step = 1; d.style.display = 'none'; el.appendChild(d); } });
+
+  const secEl = document.getElementById('c-sec'), cntEl = document.getElementById('c-count'), nextEl = document.getElementById('c-next'), prog = document.getElementById('progress');
+
+  function nextState(i, s) {
+    if (s < maxStep(slides[i])) return [i, s + 1];
+    if (i < slides.length - 1) return [i + 1, 0];
+    return null;
+  }
+
+  function render(broadcast = true) {
+    slides.forEach((el, i) => { el.classList.toggle('active', i === cur); el.classList.toggle('past', i < cur); });
+    const el = slides[cur];
+    applyStep(el, step);
+    const sec = el.dataset.section || '';
+    secEl.textContent = sec;
+    cntEl.textContent = String(cur + 1).padStart(2, '0') + ' / ' + slides.length;
+    stage.classList.toggle('nochrome', el.dataset.chrome === 'off');
+    const ns = nextState(cur, step);
+    nextEl.innerHTML = ns ? (ns[0] === cur ? 'next → <b>build</b>' : 'next → <b>' + slides[ns[0]].dataset.title + '</b>') : 'end';
+    prog.style.width = ((cur) / (slides.length - 1) * 100) + '%';
+    try { history.replaceState(null, '', location.pathname + location.search + '#' + (cur + 1) + (step ? '.' + step : '')); } catch (e) {}
+    if (isPresenter) renderPresenter();
+    if (broadcast) send();
+    onEnter(el);
+  }
+  function go(i, s = 0) { cur = Math.max(0, Math.min(slides.length - 1, i)); step = Math.min(s, maxStep(slides[cur])); render(); }
+  function next() { const ns = nextState(cur, step); if (ns) { [cur, step] = ns; render(); } }
+  function prev() { if (step > 0) step--; else if (cur > 0) { cur--; step = maxStep(slides[cur]); } else return; render(); }
+
+  /* ---------- scaling ---------- */
+  function fit() { const s = Math.min(innerWidth / 1600, innerHeight / 900); stage.style.transform = `translate(-50%,-50%) scale(${s})`; }
+  addEventListener('resize', fit); fit();
+
+  /* ---------- input ---------- */
+  const body = document.body;
+  function toggleOverview(force) {
+    const on = force ?? !body.classList.contains('ov');
+    if (on) buildOverview();
+    body.classList.toggle('ov', on);
+  }
+  addEventListener('keydown', e => {
+    if (e.target.matches && e.target.matches('input')) { if (e.key === 'Escape') e.target.blur(); else return; }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key;
+    if (body.classList.contains('help') && k !== '?') { body.classList.remove('help'); if (k === 'Escape') return; }
+    if (body.classList.contains('ov')) { if (k === 'Escape' || k === 'o' || k === 'O') toggleOverview(false); return; }
+    if (['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(k)) { e.preventDefault(); next(); }
+    else if (['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(k)) { e.preventDefault(); prev(); }
+    else if (k === 'Home') go(0);
+    else if (k === 'End') go(slides.length - 1, 99);
+    else if (k === 'o' || k === 'O' || k === 'Escape') { if (!isPresenter) toggleOverview(); }
+    else if (k === 'p' || k === 'P') openPresenter();
+    else if (k === 'n' || k === 'N') body.classList.toggle('hint');
+    else if (k === 'f' || k === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+    else if (k === '?') body.classList.toggle('help');
+  });
+  document.getElementById('viewport').addEventListener('click', e => {
+    if (e.target.closest('input,button,a,label')) return;
+    const g = e.target.closest('[data-goto]');
+    if (g) { const i = slides.findIndex(s => s.classList.contains('divider') && s.dataset.section === g.dataset.goto); if (i >= 0) { go(i); return; } }
+    // Clicking elsewhere does nothing, so text on a slide can be selected and copied. Advance with the keys.
+  });
+  let tx = null;
+  addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', e => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) (dx < 0 ? next : prev)(); tx = null; }, { passive: true });
+
+  /* ---------- clones (overview & presenter) ---------- */
+  function cloneInto(box, i, s) {
+    box.innerHTML = '';
+    const inner = document.createElement('div'); inner.className = 'frame-inner';
+    const c = slides[i].cloneNode(true);
+    c.classList.add('active'); c.classList.remove('past');
+    applyStep(c, s);
+    inner.appendChild(c); box.appendChild(inner);
+    const sc = () => { inner.style.transform = `scale(${box.clientWidth / 1600})`; };
+    sc(); requestAnimationFrame(sc);
+    return inner;
+  }
+  function buildOverview() {
+    const grid = document.getElementById('ov-grid'); grid.innerHTML = '';
+    let last = null;
+    slides.forEach((el, i) => {
+      const sec = el.dataset.section || (i === 0 ? 'Opening' : 'Close');
+      if (sec !== last) { const h = document.createElement('div'); h.className = 'ov-sec'; h.textContent = sec; grid.appendChild(h); last = sec; }
+      const b = document.createElement('button'); b.className = 'thumb' + (i === cur ? ' cur' : '');
+      const box = document.createElement('div'); box.className = 'thumb-box';
+      const cap = document.createElement('div'); cap.className = 'thumb-cap'; cap.innerHTML = `<b>${String(i + 1).padStart(2, '0')}</b><span>${el.dataset.title}</span>`;
+      b.append(box, cap); grid.appendChild(b);
+      cloneInto(box, i, maxStep(el));
+      b.addEventListener('click', () => { toggleOverview(false); go(i); });
+    });
+    requestAnimationFrame(() => grid.querySelectorAll('.thumb-box').forEach(box => { const inr = box.firstChild; if (inr) inr.style.transform = `scale(${box.clientWidth / 1600})`; }));
+    setTimeout(() => grid.querySelector('.thumb.cur')?.scrollIntoView({ block: 'center' }), 30);
+  }
+
+  /* ---------- presenter sync ---------- */
+  let peer = isPresenter ? window.opener : null;
+  function send() { if (peer && !peer.closed) { try { peer.postMessage({ gw: 1, cur, step }, '*'); } catch (e) {} } }
+  addEventListener('message', e => {
+    const d = e.data; if (!d || !d.gw) return;
+    if (e.source && e.source !== window) peer = e.source;   // re-link after either window reloads
+    if (d.hello) { send(); return; }
+    if (d.cur !== cur || d.step !== step) { cur = d.cur; step = d.step; render(false); }
+  });
+  function openPresenter() {
+    if (isPresenter) return;
+    const url = location.href.split('#')[0].split('?')[0] + '?presenter#' + (cur + 1) + (step ? '.' + step : '');
+    peer = window.open(url, 'intro-presenter', 'width=1400,height=860');
+    setTimeout(send, 600);
+  }
+
+  /* ---------- presenter view ---------- */
+  let t0 = Date.now(), paused = false, pausedAt = 0;
+  function renderPresenter() {
+    const el = slides[cur];
+    cloneInto(document.getElementById('pv-cur'), cur, step);
+    const ns = nextState(cur, step);
+    const nb = document.getElementById('pv-next');
+    if (ns) { cloneInto(nb, ns[0], ns[1]); document.getElementById('pv-next-t').textContent = ns[0] === cur ? '↳ next build on this slide' : slides[ns[0]].dataset.title; }
+    else { nb.innerHTML = ''; document.getElementById('pv-next-t').textContent = 'End of deck'; }
+    document.getElementById('pv-title').textContent = el.dataset.title;
+    document.getElementById('pv-cue').textContent = el.dataset.cue || '';
+    const ms = maxStep(el);
+    document.getElementById('pv-steps').textContent = ms ? `build ${step} / ${ms}` + (step < ms ? '  ·  more on this slide' : '  ·  slide complete') : '';
+    document.getElementById('pv-sec').textContent = el.dataset.section || '';
+    document.getElementById('pv-count').textContent = `${cur + 1} / ${slides.length}`;
+    const up = document.getElementById('pv-up'); up.innerHTML = '';
+    let lastSec = el.dataset.section;
+    for (let j = cur + 1; j < Math.min(slides.length, cur + 9); j++) {
+      const s = slides[j];
+      if (s.dataset.section && s.dataset.section !== lastSec) { const h = document.createElement('li'); h.className = 'sec'; h.textContent = s.dataset.section; up.appendChild(h); lastSec = s.dataset.section; }
+      if (s.classList.contains('divider')) continue;
+      const li = document.createElement('li'); li.innerHTML = `<b>${j + 1}</b><span>${s.dataset.title}</span>`; li.style.cursor = 'pointer';
+      li.addEventListener('click', () => go(j)); up.appendChild(li);
+    }
+  }
+  if (isPresenter) {
+    body.classList.add('presenter');
+    const tEl = document.getElementById('pv-timer'), cEl = document.getElementById('pv-clock');
+    tEl.addEventListener('click', () => { if (paused) { t0 += Date.now() - pausedAt; paused = false; } else { paused = true; pausedAt = Date.now(); } tEl.classList.toggle('paused', paused); });
+    tEl.addEventListener('dblclick', () => { t0 = Date.now(); pausedAt = Date.now(); });
+    setInterval(() => {
+      const ms = (paused ? pausedAt : Date.now()) - t0; const m = Math.floor(ms / 60000), s = Math.floor(ms / 1000) % 60;
+      tEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      cEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }, 500);
+    addEventListener('resize', () => renderPresenter());
+    if (peer) try { peer.postMessage({ gw: 1, hello: 1 }, '*'); } catch (e) {}
+  }
+
+  /* ---------- ambient: a quiet field, with thoughts planted now and then ---------- */
+  if (!isPresenter) {
+    const cv = document.getElementById('sea'), ctx = cv.getContext('2d');
+    let W, H, dpr, dots = [], rings = [], last = 0;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function init() {
+      dpr = Math.min(devicePixelRatio || 1, 2); W = cv.width = innerWidth * dpr; H = cv.height = innerHeight * dpr; dots = []; rings = [];
+      const gap = 30 * dpr;
+      for (let y = gap / 2; y < H; y += gap) for (let x = gap / 2; x < W; x += gap)
+        dots.push({ x: x + (Math.random() - .5) * gap * .5, y: y + (Math.random() - .5) * gap * .5, p: Math.random() * 6.28, s: .4 + Math.random(), lit: 0 });
+    }
+    function tick(t) {
+      if (!reduce) requestAnimationFrame(tick);
+      if (t - last < 40) return; last = t;
+      ctx.clearRect(0, 0, W, H);
+      if (rings.length < 2 && Math.random() < .012) rings.push({ x: Math.random() * W, y: Math.random() * H, r: 0, max: (180 + Math.random() * 220) * dpr });
+      const r = 1.1 * dpr;
+      for (const d of dots) {
+        for (const g of rings) {
+          const dist = Math.hypot(d.x - g.x, d.y - g.y);
+          if (Math.abs(dist - g.r) < 7 * dpr) d.lit = Math.max(d.lit, .85 * (1 - g.r / g.max));
+        }
+        const a = .07 + .06 * Math.sin(t * .0007 * d.s + d.p);
+        ctx.fillStyle = `rgba(200,205,220,${a})`; ctx.fillRect(d.x - r / 2, d.y - r / 2, r, r);
+        if (d.lit > .02) {
+          ctx.fillStyle = `rgba(255,181,71,${d.lit * .14})`; ctx.beginPath(); ctx.arc(d.x, d.y, 8 * dpr, 0, 6.283); ctx.fill();
+          ctx.fillStyle = `rgba(255,190,90,${d.lit})`; ctx.beginPath(); ctx.arc(d.x, d.y, 1.6 * dpr, 0, 6.283); ctx.fill();
+          d.lit *= .93;
+        }
+      }
+      for (const g of rings) {
+        ctx.strokeStyle = `rgba(143,176,255,${.10 * (1 - g.r / g.max)})`; ctx.lineWidth = 1 * dpr;
+        ctx.beginPath(); ctx.arc(g.x, g.y, g.r, 0, 6.283); ctx.stroke();
+        g.r += 3.2 * dpr;
+      }
+      rings = rings.filter(g => g.r < g.max);
+      if (Math.random() < .2) dots[(Math.random() * dots.length) | 0].lit = .7;
+    }
+    init(); addEventListener('resize', init);
+    requestAnimationFrame(tick);
+  }
+
+
+  /* ---------- start ---------- */
+  const m = location.hash.match(/^#(\d+)(?:\.(\d+))?/);
+  if (m) { cur = Math.max(0, Math.min(slides.length - 1, +m[1] - 1)); step = Math.min(+(m[2] || 0), maxStep(slides[cur])); }
+  render(false);
+})();
+</script>
+</body>
+</html>

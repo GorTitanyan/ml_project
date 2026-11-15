@@ -13,6 +13,7 @@ Open http://127.0.0.1:8765
 - `introspection/` — topic 2 (Anthropic, "Signs of introspection in large language models")
 - `global-workspace/` — topic 3 (Anthropic, "A global workspace in language models"): the J-space, how it was found, report / control / reasoning, automatic work, safety, consciousness
 - `workspace-uses/` — old topic 2, now only a redirect into topic 3
+- `slides/` — the same three topics as slide decks for presenting (one self-contained `index.html` per talk, plus `slides/index.html` listing them). Keys: → / Space next, ← back, O overview, P presenter window, ? help. They open straight from disk, no server needed.
 - each topic folder:
   - `index.html` — text; every paragraph exists twice: `lang="en"` and `lang="hy"`
   - `viz.js` — charts and demos (labels in `T({en, hy})`)
