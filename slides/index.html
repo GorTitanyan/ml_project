@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Looking inside Claude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080b; --ink:#eeece6; --ink2:#c9c7c0; --mute:#9196a1; --dim:#5d626e;
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.14);
+  --amber:#ffb547; --amber-soft:rgba(255,181,71,.10); --amber-line:rgba(255,181,71,.45);
+  --serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+#sea{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 75% 70% at 50% 45%,rgba(7,8,11,.86) 0%,rgba(7,8,11,.6) 55%,rgba(7,8,11,.2) 100%)}
+main{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:clamp(36px,7vh,84px) clamp(16px,5vw,72px) 56px}
+em{font-style:italic;color:var(--amber)}
+.kicker{font:500 13px/1.6 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--amber)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(56px,9vw,128px);line-height:.95;letter-spacing:-.015em;margin:20px 0 20px}
+.lede{font-size:clamp(19px,2vw,26px);line-height:1.5;color:var(--mute);font-weight:300;max-width:780px;margin:0}
+
+/* timeline */
+.line{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin:clamp(44px,7vh,72px) 0 0}
+.line::before{content:"";position:absolute;left:0;right:0;top:7px;height:1px;background:linear-gradient(90deg,var(--amber-line),var(--line2) 70%,transparent)}
+.stop{position:relative;padding-top:34px;display:flex;flex-direction:column}
+.stop::before{content:"";position:absolute;left:0;top:0;width:15px;height:15px;border-radius:50%;background:var(--bg);border:2px solid var(--amber);box-shadow:0 0 16px rgba(255,181,71,.5)}
+.when{font:500 13px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.bridge{position:absolute;top:-30px;right:-24px;transform:translateX(50%);font-family:var(--serif);font-style:italic;font-size:17px;color:var(--dim);white-space:nowrap}
+
+/* cards */
+.card{flex:1;display:flex;flex-direction:column;margin-top:22px;min-height:372px;padding:30px 32px 28px;border:1px solid var(--line);border-radius:26px;text-decoration:none;color:inherit;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));transition:border-color .3s,transform .3s,box-shadow .3s,background .3s}
+.card:hover,.card:focus-visible{outline:none;border-color:var(--amber-line);transform:translateY(-4px);box-shadow:0 18px 60px rgba(0,0,0,.45),0 0 0 1px rgba(255,181,71,.12),0 0 60px rgba(255,181,71,.08);
+  background:linear-gradient(180deg,rgba(255,181,71,.06),rgba(255,255,255,.01))}
+.card .n{font:500 15px/1 var(--mono);color:var(--amber);letter-spacing:.14em}
+.card h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,3vw,44px);line-height:1.04;margin:24px 0 16px;letter-spacing:-.01em}
+.card .q{font-family:var(--serif);font-style:italic;font-size:24px;line-height:1.25;color:var(--amber);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.chip{font:400 13px/1 var(--mono);color:var(--mute);padding:8px 11px;border:1px solid var(--line2);border-radius:999px}
+.foot{margin-top:auto;padding-top:28px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);margin-bottom:-4px}
+.meta{font:400 14px/1 var(--mono);color:var(--dim)}
+.go{font:500 15px/1 var(--mono);color:var(--ink2);letter-spacing:.04em;transition:color .3s,transform .3s}
+.card:hover .go{color:var(--amber);transform:translateX(4px)}
+.key{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:10px;border:1px solid var(--line2);border-radius:6px;font:500 12px/1 var(--mono);color:var(--dim)}
+
+.howto{margin-top:36px;display:flex;flex-wrap:wrap;gap:10px 28px;font:400 14px/1.6 var(--mono);color:var(--dim)}
+.howto b{color:var(--mute);font-weight:500}
+
+@media (max-width:900px){
+  .line{grid-template-columns:1fr;gap:6px}
+  .line::before{left:7px;right:auto;top:8px;bottom:40px;width:1px;height:auto;background:linear-gradient(180deg,var(--amber-line),var(--line2) 80%,transparent)}
+  .stop{padding:0 0 26px 38px}
+  .stop::before{top:2px}
+  .bridge{display:none}
+  .card{min-height:0}
+}
+@media (prefers-reduced-motion:reduce){.card,.go{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="sea" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+<main>
+  <span class="kicker">A talk series · Anthropic Interpretability research</span>
+  <h1>Looking <em>inside</em> Claude</h1>
+  <p class="lede">Three papers, in the order they came out. Each talk picks up the question the last one left open.</p>
+
+  <div class="line">
+    <div class="stop">
+      <span class="when">March 2025</span>
+      <a class="card" href="01-tracing-thoughts/index.html">
+        <span class="n">TALK 01</span>
+        <h2>Tracing the thoughts of a large language model</h2>
+        <p class="q">What happens inside, step by step?</p>
+        <div class="chips"><span class="chip">features &amp; circuits</span><span class="chip">planning</span><span class="chip">says vs. does</span><span class="chip">hallucinations</span><span class="chip">jailbreaks</span></div>
+        <div class="foot"><span class="meta"><span class="key">1</span>25 slides</span><span class="go">Open talk →</span></div>
+      </a>
+    </div>
+    <div class="stop">
+      <span class="bridge" style="right:auto;left:-14px;transform:translateX(-50%)">if asking can’t be trusted…</span>
+      <span class="when">October 2025</span>
+      <a class="card" href="02-introspection/index.html">
+        <span class="n">TALK 02</span>
+        <h2>Signs of introspection in large language models</h2>
+        <p class="q">Can Claude notice its own thoughts?</p>
+        <div class="chips"><span class="chip">concept injection</span><span class="chip">planted thoughts</span><span class="chip">intentions</span><span class="chip">self-control</span></div>
+        <div class="foot"><span class="meta"><span class="key">2</span>24 slides</span><span class="go">Open talk →</span></div>
+      </a>
+    </div>
+    <div class="stop">
+      <span class="bridge" style="right:auto;left:-14px;transform:translateX(-50%)">…then where do thoughts live?</span>
+      <span class="when">July 2026</span>
+      <a class="card" href="03-global-workspace/index.html">
+        <span class="n">TALK 03</span>
+        <h2>A global workspace in language models</h2>
+        <p class="q">Where do its thoughts live?</p>
+        <div class="chips"><span class="chip">J-space</span><span class="chip">five tests</span><span class="chip">hidden thoughts</span><span class="chip">consciousness?</span></div>
+        <div class="foot"><span class="meta"><span class="key">3</span>36 slides</span><span class="go">Open talk →</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="howto">
+    <span><b>1 · 2 · 3</b> open a talk</span>
+    <span><b>?</b> inside a talk: all controls</span>
+    <span><b>P</b> presenter view</span>
+    <span><b>O</b> overview</span>
+    <span>Works offline, straight from disk.</span>
+  </div>
+</main>
+<script>
+(() => {
+  const talks = [...document.querySelectorAll('.card')];
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const i = ['1', '2', '3'].indexOf(e.key);
+    if (i >= 0) location.href = talks[i].getAttribute('href');
+  });
+  // ambient dot field, as in the decks
+  const cv = document.getElementById('sea'), ctx = cv.getContext('2d');
+  let W, H, dpr, dots = [], last = 0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function init() {
+    dpr = Math.min(devicePixelRatio || 1, 2); W = cv.width = innerWidth * dpr; H = cv.height = innerHeight * dpr; dots = [];
+    const gap = 30 * dpr;
+    for (let y = gap / 2; y < H; y += gap) for (let x = gap / 2; x < W; x += gap)
+      dots.push({ x: x + (Math.random() - .5) * gap * .7, y: y + (Math.random() - .5) * gap * .7, p: Math.random() * 6.28, s: .4 + Math.random(), lit: 0 });
+  }
+  function tick(t) {
+    if (!reduce) requestAnimationFrame(tick);
+    if (t - last < 40) return; last = t;
+    ctx.clearRect(0, 0, W, H);
+    const r = 1.1 * dpr;
+    for (const d of dots) {
+      ctx.fillStyle = `rgba(200,205,220,${.07 + .06 * Math.sin(t * .0007 * d.s + d.p)})`;
+      ctx.fillRect(d.x - r / 2, d.y - r / 2, r, r);
+      if (d.lit > .02) {
+        ctx.fillStyle = `rgba(255,181,71,${d.lit * .16})`; ctx.beginPath(); ctx.arc(d.x, d.y, 9 * dpr, 0, 6.283); ctx.fill();
+        ctx.fillStyle = `rgba(255,190,90,${d.lit})`; ctx.beginPath(); ctx.arc(d.x, d.y, 1.8 * dpr, 0, 6.283); ctx.fill();
+        d.lit *= .965;
+      }
+    }
+    if (Math.random() < .3) dots[(Math.random() * dots.length) | 0].lit = .9;
+  }
+  init(); addEventListener('resize', init); requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
